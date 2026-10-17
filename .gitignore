@@ -1,0 +1,12 @@
+
+
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+.env
+weather_data.csv
+weather_clean.csv
+weather_training_data.csv
+*.pkl
+

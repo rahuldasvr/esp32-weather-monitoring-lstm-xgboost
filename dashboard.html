@@ -1,0 +1,857 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rahul | Weather Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+  --bg: #080d19;
+  --panel: #101828;
+  --line: #243047;
+  --text: #edf4ff;
+  --muted: #8998b2;
+  --cyan: #48e0e8;
+  --blue: #6595ff;
+  --pink: #ff7eab;
+  --green: #57e6a7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 10% 0%, #17305b55, transparent 40%),
+    radial-gradient(ellipse at 90% 10%, #163c4250, transparent 34%),
+    var(--bg);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  min-height: 100vh;
+}
+
+button, select { font: inherit; }
+button { cursor: pointer; }
+
+.app {
+  display: grid;
+  grid-template-columns: 235px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  padding: 30px 18px;
+  background: #0b1220d9;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  color: #07131d;
+  font-size: 16px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--cyan), #83a5ff);
+  box-shadow: 0 0 28px #48e0e833;
+}
+
+.brand h2 { font-size: 19px; margin: 0 0 4px; }
+.brand small { color: var(--muted); font-size: 10px; letter-spacing: 2px; }
+
+.nav-label {
+  padding: 0 12px;
+  margin-bottom: 10px;
+  font-size: 10px;
+  color: #63738d;
+  letter-spacing: 2px;
+}
+
+.nav-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 14px;
+  border-radius: 11px;
+  color: #94a3bb;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.nav-item.active {
+  color: var(--cyan);
+  background: linear-gradient(90deg, #48e0e819, #48e0e803);
+  border: 1px solid #48e0e82b;
+}
+
+.nav-icon { width: 20px; text-align: center; font-size: 17px; }
+
+.device {
+  margin-top: auto;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 16px;
+  border-radius: 15px;
+}
+
+.device-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #718096;
+  flex-shrink: 0;
+}
+
+.dot.online {
+  background: var(--green);
+  box-shadow: 0 0 12px #57e6a7a0;
+}
+
+.device p {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.8;
+  margin-bottom: 0;
+}
+
+main { min-width: 0; padding: 32px clamp(16px, 3vw, 42px); }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 34px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: var(--cyan);
+  margin-bottom: 9px;
+}
+
+h1 { font-size: clamp(24px, 3vw, 34px); margin: 0; letter-spacing: -1px; }
+.subtitle { color: var(--muted); font-size: 13px; margin-top: 9px; }
+
+.top-actions { display: flex; align-items: center; gap: 12px; }
+
+.clock {
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.refresh {
+  background: #15253a;
+  color: var(--cyan);
+  border: 1px solid #304660;
+  padding: 11px 14px;
+  border-radius: 11px;
+}
+
+.refresh:hover { background: #203650; }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(230px, .6fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.hero-main {
+  min-height: 205px;
+  padding: 27px;
+  border: 1px solid #324969;
+  border-radius: 19px;
+  background:
+    radial-gradient(circle at 80% 20%, #48e0e81b, transparent 38%),
+    linear-gradient(125deg, #15263d, #101828 75%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-main:after {
+  content: "☁";
+  position: absolute;
+  right: 8%;
+  top: 16%;
+  font-size: 105px;
+  color: #8beaf125;
+}
+
+.hero-label { color: #a8bad3; font-size: 12px; letter-spacing: 1px; }
+
+.hero-temp {
+  font-size: clamp(48px, 7vw, 70px);
+  letter-spacing: -4px;
+  font-weight: 650;
+  margin: 17px 0 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-temp span { font-size: 25px; letter-spacing: 0; color: var(--cyan); }
+.hero-foot { font-size: 12px; color: #9cacc4; }
+
+.hero-side {
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  padding: 23px;
+  background: linear-gradient(145deg, #121f32, #0e1625);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-side .big-icon { font-size: 29px; margin-bottom: 17px; }
+.hero-side .label { color: var(--muted); font-size: 12px; }
+.hero-side strong { font-size: 30px; margin: 9px 0; }
+.hero-side small { color: var(--muted); line-height: 1.6; }
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 28px 0 15px;
+}
+
+.section-title h2 { font-size: 16px; margin: 0; }
+.section-title p { font-size: 11px; color: var(--muted); margin: 6px 0 0; }
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.metric {
+  background: linear-gradient(145deg, #121c2d, #0e1625);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 19px;
+  min-width: 0;
+}
+
+.metric-label { color: var(--muted); font-size: 12px; }
+.metric-value { font-size: 27px; font-weight: 650; margin: 12px 0 8px; }
+.metric-note { color: #73849e; font-size: 11px; }
+
+.panel {
+  background: linear-gradient(145deg, #111b2c, #0d1523);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  min-width: 0;
+}
+
+.panel h3 { font-size: 14px; margin: 0 0 16px; }
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.chart-box { position: relative; height: 270px; }
+
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+th { color: var(--muted); font-weight: 500; }
+td { color: #dce7f7; }
+
+.badge {
+  display: inline-block;
+  border: 1px solid #30536b;
+  border-radius: 20px;
+  padding: 5px 9px;
+  color: var(--cyan);
+  font-size: 10px;
+}
+
+.empty { color: var(--muted); text-align: center; padding: 22px; }
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 14px;
+}
+
+.weather-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: linear-gradient(145deg, #121c2d, #0e1625);
+  min-width: 0;
+}
+
+.weather-card h3 {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.weather-card p {
+  font-size: 22px;
+  font-weight: 650;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.forecast-wrap { overflow-x: auto; }
+
+footer {
+  color: #657590;
+  font-size: 11px;
+  text-align: center;
+  padding: 28px 0 8px;
+}
+
+@media (max-width: 1000px) {
+  .app { grid-template-columns: 190px minmax(0, 1fr); }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .app { display: block; }
+  .sidebar { display: none; }
+  main { padding: 22px 14px; }
+  .hero, .chart-grid { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .clock { text-align: left; }
+}
+
+@media (max-width: 420px) {
+  .metrics { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">G11</div>
+      <div>
+        <h2>Rahul</h2>
+        <small>WEATHER INTELLIGENCE</small>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-label">DASHBOARD</div>
+      <div class="nav-item active"><span class="nav-icon">⌂</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">☀</span> Weather Forecast</div>
+      <div class="nav-item"><span class="nav-icon">▥</span> Historical Analytics</div>
+    </div>
+
+    <div class="device">
+      <div class="device-head">
+        <span class="dot" id="sideDot"></span>
+        <span id="deviceStatus">Checking ESP32...</span>
+      </div>
+      <p>Local sensor connection<br>
+      <span id="lastUpdated">Last update: --</span></p>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">IOT • LIVE MONITORING • MACHINE LEARNING</div>
+        <h1>Weather Intelligence Dashboard</h1>
+        <div class="subtitle">ESP32 sensor readings and online weather forecast</div>
+      </div>
+
+      <div class="top-actions">
+        <div class="clock">
+          <div id="clockDate">--</div>
+          <div id="clockTime">--</div>
+        </div>
+        <button class="refresh" id="refreshButton">↻ Refresh</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-main">
+        <div class="hero-label">LOCAL ESP32 TEMPERATURE</div>
+        <div class="hero-temp"><span id="heroTemp">--</span><span> °C</span></div>
+        <div class="hero-foot" id="liveBadge">Waiting for sensor data...</div>
+      </div>
+
+      <div class="hero-side">
+        <div class="big-icon">💧</div>
+        <div class="label">LOCAL HUMIDITY</div>
+        <strong><span id="heroHumidity">--</span>%</strong>
+        <small>Measured by the ESP32-connected humidity sensor</small>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Live Sensor Measurements</h2>
+        <p>Measurements reported by your ESP32 device</p>
+      </div>
+      <span class="badge">ESP32 LIVE</span>
+    </div>
+
+    <section class="metrics">
+      <div class="metric">
+        <div class="metric-label">Temperature</div>
+        <div class="metric-value"><span id="temperature">--</span> °C</div>
+        <div class="metric-note">Local sensor reading</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Humidity</div>
+        <div class="metric-value"><span id="humidity">--</span> %</div>
+        <div class="metric-note">Local sensor reading</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Atmospheric Pressure</div>
+        <div class="metric-value"><span id="pressure">--</span></div>
+        <div class="metric-note">hPa · Requires working pressure sensor</div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Online Weather Overview</h2>
+        <p>Forecast information for the configured location</p>
+      </div>
+      <span class="badge">ONLINE FORECAST</span>
+    </div>
+
+    <section class="weather-grid">
+      <div class="weather-card"><h3>Sunrise</h3><p id="sunrise">--</p></div>
+      <div class="weather-card"><h3>Sunset</h3><p id="sunset">--</p></div>
+      <div class="weather-card"><h3>Daylight Duration</h3><p id="daylight">--</p></div>
+      <div class="weather-card"><h3>Wind Speed</h3><p id="windSpeed">--</p></div>
+      <div class="weather-card"><h3>Wind Direction</h3><p id="windDirection">--</p></div>
+      <div class="weather-card"><h3>Rain Probability</h3><p id="rainChance">--</p></div>
+      <div class="weather-card"><h3>UV Index</h3><p id="uvIndex">--</p></div>
+      <div class="weather-card"><h3>Cloud Cover</h3><p id="cloudCover">--</p></div>
+      <div class="weather-card"><h3>Visibility</h3><p id="visibility">--</p></div>
+      <div class="weather-card"><h3>Today's Rainfall</h3><p id="rainfall">--</p></div>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>7-Day Weather Forecast</h2>
+        <p>Daily forecast values from the online weather service</p>
+      </div>
+    </div>
+
+    <section class="panel">
+      <p id="forecastMessage" class="metric-note">Loading forecast...</p>
+      <div class="forecast-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Min Temperature</th>
+              <th>Max Temperature</th>
+              <th>Rain Probability</th>
+              <th>Rainfall</th>
+            </tr>
+          </thead>
+          <tbody id="forecastRows">
+            <tr><td colspan="5" class="empty">Loading forecast...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Historical Analytics</h2>
+        <p>Readings saved by data_logger.py to weather_data.csv</p>
+      </div>
+      <select id="historyRange" class="refresh">
+        <option value="1h">Last 1 hour</option>
+        <option value="6h">Last 6 hours</option>
+        <option value="24h" selected>Last 24 hours</option>
+        <option value="all">All records</option>
+      </select>
+    </div>
+
+    <section class="chart-grid">
+      <div class="panel">
+        <h3>Temperature History (°C)</h3>
+        <div class="chart-box"><canvas id="temperatureChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>Humidity History (%)</h3>
+        <div class="chart-box"><canvas id="humidityChart"></canvas></div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Historical Records</h2>
+        <p>Most recent records from your CSV file</p>
+      </div>
+    </div>
+
+    <section class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Temperature</th>
+              <th>Humidity</th>
+              <th>Pressure</th>
+            </tr>
+          </thead>
+          <tbody id="historyRows">
+            <tr><td colspan="4" class="empty">Loading history...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>GROUP 11 · ESP32 WEATHER MONITORING AND PREDICTION PROJECT</footer>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+function setText(id, value) {
+  const element = $(id);
+  if (element) element.textContent = value;
+}
+
+function displayNumber(value, digits = 1) {
+  if (value === null || value === undefined || value === "") return "--";
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toFixed(digits) : "--";
+}
+
+function updateClock() {
+  const now = new Date();
+  setText("clockDate", now.toLocaleDateString("en-IN", {
+    weekday: "short", day: "2-digit", month: "short", year: "numeric"
+  }));
+  setText("clockTime", now.toLocaleTimeString("en-IN"));
+}
+
+async function updateLive() {
+  try {
+    const response = await fetch("/api/weather", { cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    const temperature = data.temperature;
+    const humidity = data.humidity;
+    const pressure = data.pressure;
+
+    setText("temperature", displayNumber(temperature));
+    setText("heroTemp", displayNumber(temperature));
+    setText("humidity", displayNumber(humidity));
+    setText("heroHumidity", displayNumber(humidity));
+    setText("pressure", pressure == null ? "--" : displayNumber(pressure));
+
+    setText("liveBadge", "● SYSTEM ONLINE");
+    setText("deviceStatus", "ESP32 Connected");
+    setText("lastUpdated", "Last update: " + new Date().toLocaleTimeString("en-IN"));
+
+    $("sideDot")?.classList.add("online");
+  } catch (error) {
+    setText("liveBadge", "ESP32 sensor data unavailable");
+    setText("deviceStatus", "ESP32 Offline");
+    $("sideDot")?.classList.remove("online");
+    console.error("Live sensor error:", error);
+  }
+}
+
+async function loadOnlineWeather() {
+  const message = $("forecastMessage");
+
+  try {
+    const response = await fetch("/api/online-weather", { cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    const current = data.current || {};
+    const hourly = data.hourly || {};
+    const daily = data.daily || {};
+
+    function fmt(value, unit = "") {
+      if (value === null || value === undefined || value === "") return "--";
+      const number = Number(value);
+      return Number.isFinite(number) ? number + unit : "--";
+    }
+
+    function timeOnly(value) {
+      if (!value) return "--";
+      return value.slice(11, 16);
+    }
+
+    setText("sunrise", timeOnly(daily.sunrise?.[0]));
+    setText("sunset", timeOnly(daily.sunset?.[0]));
+
+    const seconds = daily.daylight_duration?.[0];
+    setText("daylight", seconds == null ? "--" :
+      Math.floor(seconds / 3600) + "h " +
+      Math.floor((seconds % 3600) / 60) + "m");
+
+    setText("windSpeed", fmt(current.wind_speed_10m, " km/h"));
+    setText("windDirection", fmt(current.wind_direction_10m, "°"));
+    setText("cloudCover", fmt(current.cloud_cover, "%"));
+    setText("rainfall", fmt(daily.precipitation_sum?.[0], " mm"));
+
+    // Use the current hour in India to find the corresponding hourly forecast.
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(new Date());
+
+    const part = Object.fromEntries(parts.map(item => [item.type, item.value]));
+    const currentHour = `${part.year}-${part.month}-${part.day}T${part.hour}`;
+
+    let index = Array.isArray(hourly.time)
+      ? hourly.time.findIndex(time => time.startsWith(currentHour))
+      : -1;
+
+    if (index < 0) index = 0;
+
+    setText("rainChance", fmt(hourly.precipitation_probability?.[index], "%"));
+    setText("uvIndex", fmt(hourly.uv_index?.[index]));
+
+    const visibility = hourly.visibility?.[index];
+    setText("visibility", visibility == null
+      ? "--" : (Number(visibility) / 1000).toFixed(1) + " km");
+
+    const rows = $("forecastRows");
+    rows.replaceChildren();
+
+    if (Array.isArray(daily.time)) {
+      daily.time.forEach((date, i) => {
+        const values = [
+          date,
+          fmt(daily.temperature_2m_min?.[i], " °C"),
+          fmt(daily.temperature_2m_max?.[i], " °C"),
+          fmt(daily.precipitation_probability_max?.[i], "%"),
+          fmt(daily.precipitation_sum?.[i], " mm")
+        ];
+
+        const tr = document.createElement("tr");
+
+        values.forEach(value => {
+          const td = document.createElement("td");
+          td.textContent = value;
+          tr.appendChild(td);
+        });
+
+        rows.appendChild(tr);
+      });
+    }
+
+    message.textContent = "Online forecast updated successfully.";
+  } catch (error) {
+    console.error("Online weather error:", error);
+    message.textContent =
+      "Could not load online weather. Check your internet connection and Flask.";
+  }
+}
+
+let temperatureChart;
+let humidityChart;
+
+function createChart(canvasId, label, color) {
+  const canvas = $(canvasId);
+  return new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label,
+        data: [],
+        borderColor: color,
+        backgroundColor: color + "22",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: "index" },
+      plugins: { legend: { labels: { color: "#aab8cf" } } },
+      scales: {
+        x: {
+          ticks: { color: "#8998b2", maxTicksLimit: 7 },
+          grid: { color: "#243047" }
+        },
+        y: {
+          ticks: { color: "#8998b2" },
+          grid: { color: "#243047" }
+        }
+      }
+    }
+  });
+}
+
+async function updateHistory() {
+  const range = $("historyRange").value;
+
+  try {
+    const response = await fetch(
+      "/api/history?range=" + encodeURIComponent(range),
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const data = await response.json();
+    const records = Array.isArray(data.records) ? data.records : [];
+
+    const validTemperature = records.filter(
+      row => row.temperature !== null && row.temperature !== undefined
+    );
+
+    const validHumidity = records.filter(
+      row => row.humidity !== null && row.humidity !== undefined
+    );
+
+    const labels = records.map(row => {
+      const date = new Date(row.timestamp);
+      return Number.isNaN(date.getTime())
+        ? row.timestamp
+        : date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    });
+
+    const temperatureLookup = new Map(
+      validTemperature.map(row => [row.timestamp, Number(row.temperature)])
+    );
+
+    const humidityLookup = new Map(
+      validHumidity.map(row => [row.timestamp, Number(row.humidity)])
+    );
+
+    temperatureChart.data.labels = labels;
+    temperatureChart.data.datasets[0].data = records.map(
+      row => temperatureLookup.has(row.timestamp)
+        ? temperatureLookup.get(row.timestamp) : null
+    );
+    temperatureChart.update();
+
+    humidityChart.data.labels = labels;
+    humidityChart.data.datasets[0].data = records.map(
+      row => humidityLookup.has(row.timestamp)
+        ? humidityLookup.get(row.timestamp) : null
+    );
+    humidityChart.update();
+
+    const tbody = $("historyRows");
+    tbody.replaceChildren();
+
+    const recent = records.slice(-30).reverse();
+
+    if (recent.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 4;
+      td.className = "empty";
+      td.textContent = "No historical records found for this period.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    recent.forEach(row => {
+      const tr = document.createElement("tr");
+
+      const values = [
+        row.timestamp || "--",
+        row.temperature == null ? "--" : displayNumber(row.temperature) + " °C",
+        row.humidity == null ? "--" : displayNumber(row.humidity) + " %",
+        row.pressure == null ? "--" : displayNumber(row.pressure) + " hPa"
+      ];
+
+      values.forEach(value => {
+        const td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  } catch (error) {
+    console.error("History error:", error);
+    const tbody = $("historyRows");
+    tbody.innerHTML =
+      '<tr><td colspan="4" class="empty">Could not load historical data.</td></tr>';
+  }
+}
+
+function refreshAll() {
+  updateLive();
+  loadOnlineWeather();
+  updateHistory();
+}
+
+temperatureChart = createChart("temperatureChart", "Temperature °C", "#48e0e8");
+humidityChart = createChart("humidityChart", "Humidity %", "#ff7eab");
+
+$("refreshButton").addEventListener("click", refreshAll);
+$("historyRange").addEventListener("change", updateHistory);
+
+updateClock();
+refreshAll();
+
+setInterval(updateClock, 1000);
+setInterval(updateLive, 10000);
+setInterval(loadOnlineWeather, 10 * 60 * 1000);
+setInterval(updateHistory, 30000);
+</script>
+</body>
+</html>

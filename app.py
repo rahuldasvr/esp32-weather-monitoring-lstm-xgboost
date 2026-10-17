@@ -3,16 +3,24 @@ from flask import Flask, jsonify, send_from_directory, request
 import requests
 import csv
 import os
+import time
+import secrets
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_FILE = os.path.join(BASE_DIR, "weather_data.csv")
 
-# Use your ESP32's current IP address
+# Local ESP32 address (used when running on your computer)
 ESP32_URL = "http://10.163.181.58/api/data"
+
+# Set this variable in Render's Environment settings
+CLOUD_API_TOKEN = os.environ.get("CLOUD_API_TOKEN", "")
+
+# Temporary in-memory storage for the latest cloud reading
+latest_cloud_reading = None
+latest_cloud_reading_time = None
 
 
 def read_number(value):
@@ -24,6 +32,10 @@ def read_number(value):
         return None
 
 
+def running_on_render():
+    return bool(os.environ.get("RENDER"))
+
+
 @app.route("/")
 def dashboard():
     return send_from_directory(BASE_DIR, "dashboard.html")
@@ -31,6 +43,25 @@ def dashboard():
 
 @app.route("/api/weather")
 def weather():
+    # On Render, use the latest reading sent by the ESP32.
+    if running_on_render():
+        if latest_cloud_reading is None:
+            return jsonify({
+                "error": "Waiting for ESP32 cloud readings",
+                "details": "The ESP32 has not sent a reading yet."
+            }), 503
+
+        # Mark readings older than 2 minutes as stale.
+        age = time.time() - latest_cloud_reading_time
+        if age > 120:
+            return jsonify({
+                "error": "ESP32 reading is stale",
+                "details": "Waiting for a fresh sensor reading."
+            }), 503
+
+        return jsonify(latest_cloud_reading)
+
+    # On your computer, keep using the local ESP32.
     try:
         response = requests.get(ESP32_URL, timeout=3)
         response.raise_for_status()
@@ -43,7 +74,9 @@ def weather():
             return None
 
         return jsonify({
-            "temperature": get_value("temperature", "temp", "Temperature"),
+            "temperature": get_value(
+                "temperature", "temp", "Temperature"
+            ),
             "humidity": get_value("humidity", "Humidity"),
             "pressure": get_value("pressure", "Pressure")
         })
@@ -53,6 +86,53 @@ def weather():
             "error": "Could not read the ESP32 sensor API",
             "details": str(error)
         }), 502
+
+
+@app.route("/api/esp32-update", methods=["POST"])
+def esp32_update():
+    global latest_cloud_reading, latest_cloud_reading_time
+
+    if not CLOUD_API_TOKEN:
+        return jsonify({
+            "error": "Cloud token is not configured"
+        }), 503
+
+    supplied_token = request.headers.get("X-API-Token", "")
+
+    if not secrets.compare_digest(
+        supplied_token, CLOUD_API_TOKEN
+    ):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    def number(*names):
+        for name in names:
+            value = data.get(name)
+            if value is not None:
+                return read_number(value)
+        return None
+
+    temperature = number("temperature", "temp", "Temperature")
+    humidity = number("humidity", "Humidity")
+    pressure = number("pressure", "Pressure")
+
+    if temperature is None or humidity is None:
+        return jsonify({
+            "error": "Temperature and humidity are required"
+        }), 400
+
+    latest_cloud_reading = {
+        "temperature": temperature,
+        "humidity": humidity,
+        "pressure": pressure
+    }
+    latest_cloud_reading_time = time.time()
+
+    return jsonify({"status": "ok"}), 200
 
 
 @app.route("/api/history")
@@ -66,17 +146,25 @@ def history():
         "24h": timedelta(hours=24)
     }
 
-    cutoff = now - ranges[selected_range] if selected_range in ranges else None
+    cutoff = (
+        now - ranges[selected_range]
+        if selected_range in ranges else None
+    )
     records = []
 
     if not os.path.exists(CSV_FILE):
         return jsonify({
             "records": [],
-            "message": "weather_data.csv not found. Start data_logger.py."
+            "message": (
+                "weather_data.csv not found. "
+                "Start data_logger.py."
+            )
         })
 
     try:
-        with open(CSV_FILE, "r", newline="", encoding="utf-8-sig") as file:
+        with open(
+            CSV_FILE, "r", newline="", encoding="utf-8-sig"
+        ) as file:
             reader = csv.DictReader(file)
 
             for row in reader:
@@ -86,9 +174,10 @@ def history():
                     timestamp = datetime.fromisoformat(
                         timestamp_text.strip().replace("Z", "+00:00")
                     )
-                    # Convert timezone-aware timestamps to local naive time
                     if timestamp.tzinfo is not None:
-                        timestamp = timestamp.astimezone().replace(tzinfo=None)
+                        timestamp = timestamp.astimezone().replace(
+                            tzinfo=None
+                        )
                 except (ValueError, AttributeError):
                     continue
 
@@ -96,8 +185,12 @@ def history():
                     continue
 
                 records.append({
-                    "timestamp": timestamp.isoformat(timespec="seconds"),
-                    "temperature": read_number(row.get("temperature")),
+                    "timestamp": timestamp.isoformat(
+                        timespec="seconds"
+                    ),
+                    "temperature": read_number(
+                        row.get("temperature")
+                    ),
                     "humidity": read_number(row.get("humidity")),
                     "pressure": read_number(row.get("pressure"))
                 })
@@ -151,9 +244,6 @@ def online_weather():
     except requests.RequestException as error:
         return jsonify({"error": str(error)}), 502
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
-
-
-

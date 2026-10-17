@@ -12,15 +12,16 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_FILE = os.path.join(BASE_DIR, "weather_data.csv")
 
-# Local ESP32 address (used when running on your computer)
 ESP32_URL = "http://10.163.181.58/api/data"
-
-# Set this variable in Render's Environment settings
 CLOUD_API_TOKEN = os.environ.get("CLOUD_API_TOKEN", "")
 
-# Temporary in-memory storage for the latest cloud reading
 latest_cloud_reading = None
 latest_cloud_reading_time = None
+
+# Online weather cache
+online_weather_cache = None
+online_weather_cache_time = 0
+ONLINE_WEATHER_CACHE_SECONDS = 600  # 10 minutes
 
 
 def read_number(value):
@@ -43,7 +44,6 @@ def dashboard():
 
 @app.route("/api/weather")
 def weather():
-    # On Render, use the latest reading sent by the ESP32.
     if running_on_render():
         if latest_cloud_reading is None:
             return jsonify({
@@ -51,7 +51,6 @@ def weather():
                 "details": "The ESP32 has not sent a reading yet."
             }), 503
 
-        # Mark readings older than 2 minutes as stale.
         age = time.time() - latest_cloud_reading_time
         if age > 120:
             return jsonify({
@@ -61,7 +60,6 @@ def weather():
 
         return jsonify(latest_cloud_reading)
 
-    # On your computer, keep using the local ESP32.
     try:
         response = requests.get(ESP32_URL, timeout=3)
         response.raise_for_status()
@@ -99,15 +97,10 @@ def esp32_update():
 
     supplied_token = request.headers.get("X-API-Token", "")
 
-    print("Expected token configured:", bool(CLOUD_API_TOKEN))
-    print("Received token length:", len(supplied_token))
-
     if not secrets.compare_digest(supplied_token, CLOUD_API_TOKEN):
-        print("Token authentication failed")
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json(silent=True)
-
     if not isinstance(data, dict):
         return jsonify({"error": "Invalid JSON"}), 400
 
@@ -211,9 +204,20 @@ def history():
 
 @app.route("/api/online-weather")
 def online_weather():
+    global online_weather_cache, online_weather_cache_time
+
+    # Reuse recent data instead of repeatedly calling Open-Meteo.
+    if (
+        online_weather_cache is not None
+        and time.time() - online_weather_cache_time
+        < ONLINE_WEATHER_CACHE_SECONDS
+    ):
+        response = jsonify(online_weather_cache)
+        response.headers["X-Weather-Cache"] = "HIT"
+        return response
+
     latitude = 10.5276
     longitude = 76.2144
-
     url = "https://api.open-meteo.com/v1/forecast"
 
     params = {
@@ -240,11 +244,42 @@ def online_weather():
     }
 
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(
+            url,
+            params=params,
+            timeout=15
+        )
         response.raise_for_status()
-        return jsonify(response.json())
+        data = response.json()
+
+        online_weather_cache = data
+        online_weather_cache_time = time.time()
+
+        result = jsonify(data)
+        result.headers["X-Weather-Cache"] = "MISS"
+        return result
+
     except requests.RequestException as error:
-        return jsonify({"error": str(error)}), 502
+        # If Open-Meteo is temporarily unavailable, use the last
+        # successful response if one exists.
+        if online_weather_cache is not None:
+            result = jsonify(online_weather_cache)
+            result.headers["X-Weather-Cache"] = "STALE"
+            return result
+
+        status_code = getattr(
+            getattr(error, "response", None),
+            "status_code",
+            None
+        )
+
+        return jsonify({
+            "error": "Online weather service is temporarily unavailable",
+            "details": (
+                f"Open-Meteo returned HTTP {status_code}"
+                if status_code else str(error)
+            )
+        }), 502
 
 
 if __name__ == "__main__":

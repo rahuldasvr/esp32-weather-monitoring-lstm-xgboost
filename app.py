@@ -99,9 +99,11 @@ def esp32_update():
 
     supplied_token = request.headers.get("X-API-Token", "")
 
-    if not secrets.compare_digest(
-        supplied_token, CLOUD_API_TOKEN
-    ):
+    print("Expected token configured:", bool(CLOUD_API_TOKEN))
+    print("Received token length:", len(supplied_token))
+
+    if not secrets.compare_digest(supplied_token, CLOUD_API_TOKEN):
+        print("Token authentication failed")
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json(silent=True)

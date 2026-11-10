@@ -1,0 +1,146 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+% Professional Color Palette
+\definecolor{codegreen}{rgb}{0.12, 0.55, 0.25}
+\definecolor{codegray}{rgb}{0.45, 0.45, 0.45}
+\definecolor{codepurple}{rgb}{0.55, 0.15, 0.70}
+\definecolor{codeblue}{rgb}{0.10, 0.35, 0.75}
+\definecolor{backcolour}{rgb}{0.97, 0.98, 0.99}
+\definecolor{rulecolor}{rgb}{0.80, 0.85, 0.90}
+
+% Global Listings Settings
+\lstdefinestyle{customcode}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=t,
+    keepspaces=true,
+    numbers=left,
+    numbersep=8pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{rulecolor},
+    framerule=0.8pt,
+    xleftmargin=15pt,
+    framexleftmargin=15pt
+}
+
+\lstset{style=customcode}
+
+% Page Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textbf{ESP32 IoT Weather Monitoring \& ML Forecasting System}}
+\rhead{Source Code Appendix}
+\cfoot{\thepage}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=codeblue,
+    urlcolor=codepurple,
+    pdftitle={ESP32 Weather Prediction - Complete Source Code Appendix},
+    pdfauthor={Group 11 - NSS College of Engineering, Palakkad}
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge \textbf{ESP32 IoT Weather Monitoring \&\\ AI Prediction System}}\\[0.8cm]
+    {\LARGE \textbf{Complete Source Code Appendix}}\\[1.5cm]
+    
+    \textbf{Department of Electrical and Electronics Engineering}\\[0.3cm]
+    \textbf{NSS College of Engineering, Palakkad}\\[1.5cm]
+    
+    \textbf{Group 11}\\[0.4cm]
+    \textbf{Rahul Das V R} (Reg No: NSS23EE107)\\[2.5cm]
+    
+    \vfill
+    {\large Multi-Horizon Environmental Forecasting: 10, 20, and 30-Minute Horizons}\\[0.2cm]
+    {\large Powered by Multi-Output XGBoost and Deep Sequence LSTM Networks}\\[0.5cm]
+    \today
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{System Architecture \& Repository Layout}
+This document serves as the comprehensive source code appendix for the \textbf{ESP32 IoT Weather Monitoring and Predictive Intelligence System}. The codebase is structured into five core functional modules:
+
+\begin{enumerate}
+    \item \textbf{Data Acquisition \& Telemetry:} Continuous local logging from ESP32 via HTTP REST API.
+    \item \textbf{Data Sanitization \& Preprocessing:} Glitch rejection, multi-horizon target formation.
+    \item \textbf{Model Training Pipelines:} Boosted tree regression (XGBoost) and sequential neural networks (LSTM).
+    \item \textbf{Production Server \& REST API:} Flask application hosting live telemetry, background logging, and real-time model inference.
+    \item \textbf{Front-End Speedometer Dashboard:} Cockpit-style SVG speedometer dials, animated needles, and real-time Chart.js tracking.
+\end{enumerate}
+
+\newpage
+\section{Data Pipeline Modules}
+
+\subsection{1. \texttt{clean\_data.py} -- Data Sanitization and Glitch Filtering}
+Validates sensor bounds (temperature between $-40^\circ\text{C}$ and $+85^\circ\text{C}$, humidity within $0-100\%$, plausible atmospheric pressures), resolves missing values, and removes duplicate records.
+
+\lstinputlisting[language=Python, caption={clean\_data.py}]{clean_data.py}
+
+\newpage
+\subsection{2. \texttt{prepare\_data.py} -- Multi-Horizon Training Dataset Generator}
+Pairs each historical reading with sensor observations 10, 20, and 30 minutes in the future using asynchronous nearest-neighbor temporal joins (\texttt{pd.merge\_asof}).
+
+\lstinputlisting[language=Python, caption={prepare\_data.py}]{prepare_data.py}
+
+\newpage
+\subsection{3. \texttt{data\_logger.py} -- Standalone ESP32 Telemetry Logger}
+Polls the ESP32 endpoint at \texttt{http://10.163.181.58/api/data} every 30 seconds and writes verified records to \texttt{weather\_data.csv}.
+
+\lstinputlisting[language=Python, caption={data\_logger.py}]{data_logger.py}
+
+\newpage
+\section{Machine Learning Training Pipelines}
+
+\subsection{1. \texttt{train\_xgboost.py} -- Multi-Horizon XGBoost Regressors}
+Trains multi-output tree ensembles for 10-minute, 20-minute, and 30-minute horizons using temperature, humidity, pressure, and cyclical diurnal time features ($\sin/\cos$ encoding).
+
+\lstinputlisting[language=Python, caption={train\_xgboost.py}]{train_xgboost.py}
+
+\newpage
+\subsection{2. \texttt{train\_lstm.py} -- Multi-Horizon Sequential LSTM Networks}
+Normalizes multi-variate time series windows ($W = 10$ steps) through \texttt{MinMaxScaler} and trains recurrent memory cells to capture nonlinear physical weather trajectories.
+
+\lstinputlisting[language=Python, caption={train\_lstm.py}]{train_lstm.py}
+
+\newpage
+\section{Production Backend \& Inference Server}
+
+\subsection{1. \texttt{app.py} -- Flask API, Background Logger, \& Multi-Horizon Engine}
+Runs the production application server on port 5001. Incorporates thread-safe deduplication logging, sensor telemetry caching, Open-Meteo external benchmarks, and real-time multi-model evaluation.
+
+\lstinputlisting[language=Python, caption={app.py}]{app.py}
+
+\newpage
+\section{Front-End Speedometer Dashboard}
+
+\subsection{1. \texttt{dashboard.html} -- Interactive Cockpit Speedometer Gauges}
+The single-page user interface featuring automotive-grade SVG speedometer dials with rotating needle mechanics, live ESP32 status updates, and 6 separate multi-horizon forecast cards.
+
+\lstinputlisting[language=html, caption={dashboard.html}]{dashboard.html}
+
+\end{document}

@@ -1,12 +1,45 @@
 
-
+# Python virtual environments
 .venv/
 .venv-*/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Private credentials
 .env
+
+# Raw and temporary data
 weather_data.csv
 weather_clean.csv
-weather_training_data.csv
+
+# Ignore pickle files by default
 *.pkl
 
+# Include trained models and scalers required by the application
+!xgboost_10min.pkl
+!xgboost_20min.pkl
+!xgboost_30min.pkl
+
+!xgboost_features_10min.pkl
+!xgboost_features_20min.pkl
+!xgboost_features_30min.pkl
+
+!lstm_x_scaler_10min.pkl
+!lstm_x_scaler_20min.pkl
+!lstm_x_scaler_30min.pkl
+
+!lstm_y_scaler_10min.pkl
+!lstm_y_scaler_20min.pkl
+!lstm_y_scaler_30min.pkl
+
+# Exclude backup files
+*.bak
+*_backup.py
+model_backup/
+# Temporary backup files
+*.bak*
+app_backup.py
+*_backup.py
+model_backup/

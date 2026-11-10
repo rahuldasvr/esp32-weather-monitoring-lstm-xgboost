@@ -4,854 +4,1113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rahul | Weather Intelligence</title>
+<meta name="theme-color" content="#080d19">
+<title>GROUP 11 | AI Weather Intelligence</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --bg: #080d19;
-  --panel: #101828;
-  --line: #243047;
-  --text: #edf4ff;
-  --muted: #8998b2;
-  --cyan: #48e0e8;
-  --blue: #6595ff;
-  --pink: #ff7eab;
-  --green: #57e6a7;
+  --bg:#080d19;--panel:#111a2b;--panel2:#0d1524;
+  --border:#22314a;--text:#e8eefb;--muted:#91a0b9;
+  --cyan:#46d9f5;--blue:#7195ff;--green:#4de0a1;
+  --orange:#ffbd69;--red:#ff7185;--purple:#b69aff;
 }
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  color: var(--text);
-  background:
-    radial-gradient(ellipse at 10% 0%, #17305b55, transparent 40%),
-    radial-gradient(ellipse at 90% 10%, #163c4250, transparent 34%),
-    var(--bg);
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
-  min-height: 100vh;
-}
-
-button, select { font: inherit; }
-button { cursor: pointer; }
-
-.app {
-  display: grid;
-  grid-template-columns: 235px minmax(0, 1fr);
-  min-height: 100vh;
-}
-
-.sidebar {
-  padding: 30px 18px;
-  background: #0b1220d9;
-  border-right: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 0 8px;
-}
-
-.logo {
-  display: grid;
-  place-items: center;
-  width: 43px;
-  height: 43px;
-  border-radius: 14px;
-  color: #07131d;
-  font-size: 16px;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--cyan), #83a5ff);
-  box-shadow: 0 0 28px #48e0e833;
-}
-
-.brand h2 { font-size: 19px; margin: 0 0 4px; }
-.brand small { color: var(--muted); font-size: 10px; letter-spacing: 2px; }
-
-.nav-label {
-  padding: 0 12px;
-  margin-bottom: 10px;
-  font-size: 10px;
-  color: #63738d;
-  letter-spacing: 2px;
-}
-
-.nav-item {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 13px 14px;
-  border-radius: 11px;
-  color: #94a3bb;
-  margin-bottom: 5px;
-  font-size: 13px;
-}
-
-.nav-item.active {
-  color: var(--cyan);
-  background: linear-gradient(90deg, #48e0e819, #48e0e803);
-  border: 1px solid #48e0e82b;
-}
-
-.nav-icon { width: 20px; text-align: center; font-size: 17px; }
-
-.device {
-  margin-top: auto;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  padding: 16px;
-  border-radius: 15px;
-}
-
-.device-head {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #718096;
-  flex-shrink: 0;
-}
-
-.dot.online {
-  background: var(--green);
-  box-shadow: 0 0 12px #57e6a7a0;
-}
-
-.device p {
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.8;
-  margin-bottom: 0;
-}
-
-main { min-width: 0; padding: 32px clamp(16px, 3vw, 42px); }
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 34px;
-}
-
-.eyebrow {
-  font-size: 10px;
-  letter-spacing: 2.5px;
-  color: var(--cyan);
-  margin-bottom: 9px;
-}
-
-h1 { font-size: clamp(24px, 3vw, 34px); margin: 0; letter-spacing: -1px; }
-.subtitle { color: var(--muted); font-size: 13px; margin-top: 9px; }
-
-.top-actions { display: flex; align-items: center; gap: 12px; }
-
-.clock {
-  text-align: right;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.8;
-}
-
-.refresh {
-  background: #15253a;
-  color: var(--cyan);
-  border: 1px solid #304660;
-  padding: 11px 14px;
-  border-radius: 11px;
-}
-
-.refresh:hover { background: #203650; }
-
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(230px, .6fr);
-  gap: 18px;
-  margin-bottom: 22px;
-}
-
-.hero-main {
-  min-height: 205px;
-  padding: 27px;
-  border: 1px solid #324969;
-  border-radius: 19px;
-  background:
-    radial-gradient(circle at 80% 20%, #48e0e81b, transparent 38%),
-    linear-gradient(125deg, #15263d, #101828 75%);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-main:after {
-  content: "☁";
-  position: absolute;
-  right: 8%;
-  top: 16%;
-  font-size: 105px;
-  color: #8beaf125;
-}
-
-.hero-label { color: #a8bad3; font-size: 12px; letter-spacing: 1px; }
-
-.hero-temp {
-  font-size: clamp(48px, 7vw, 70px);
-  letter-spacing: -4px;
-  font-weight: 650;
-  margin: 17px 0 10px;
-  position: relative;
-  z-index: 1;
-}
-
-.hero-temp span { font-size: 25px; letter-spacing: 0; color: var(--cyan); }
-.hero-foot { font-size: 12px; color: #9cacc4; }
-
-.hero-side {
-  border: 1px solid var(--line);
-  border-radius: 19px;
-  padding: 23px;
-  background: linear-gradient(145deg, #121f32, #0e1625);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.hero-side .big-icon { font-size: 29px; margin-bottom: 17px; }
-.hero-side .label { color: var(--muted); font-size: 12px; }
-.hero-side strong { font-size: 30px; margin: 9px 0; }
-.hero-side small { color: var(--muted); line-height: 1.6; }
-
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 28px 0 15px;
-}
-
-.section-title h2 { font-size: 16px; margin: 0; }
-.section-title p { font-size: 11px; color: var(--muted); margin: 6px 0 0; }
-
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 15px;
-}
-
-.metric {
-  background: linear-gradient(145deg, #121c2d, #0e1625);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 19px;
-  min-width: 0;
-}
-
-.metric-label { color: var(--muted); font-size: 12px; }
-.metric-value { font-size: 27px; font-weight: 650; margin: 12px 0 8px; }
-.metric-note { color: #73849e; font-size: 11px; }
-
-.panel {
-  background: linear-gradient(145deg, #111b2c, #0d1523);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 20px;
-  min-width: 0;
-}
-
-.panel h3 { font-size: 14px; margin: 0 0 16px; }
-.chart-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.chart-box { position: relative; height: 270px; }
-
-.table-wrap { overflow-x: auto; }
-
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th, td {
-  padding: 12px 10px;
-  text-align: left;
-  border-bottom: 1px solid var(--line);
-  white-space: nowrap;
-}
-th { color: var(--muted); font-weight: 500; }
-td { color: #dce7f7; }
-
-.badge {
-  display: inline-block;
-  border: 1px solid #30536b;
-  border-radius: 20px;
-  padding: 5px 9px;
-  color: var(--cyan);
-  font-size: 10px;
-}
-
-.empty { color: var(--muted); text-align: center; padding: 22px; }
-
-.weather-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-  gap: 14px;
-}
-
-.weather-card {
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: linear-gradient(145deg, #121c2d, #0e1625);
-  min-width: 0;
-}
-
-.weather-card h3 {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
-  margin: 0 0 12px;
-}
-
-.weather-card p {
-  font-size: 22px;
-  font-weight: 650;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.forecast-wrap { overflow-x: auto; }
-
-footer {
-  color: #657590;
-  font-size: 11px;
-  text-align: center;
-  padding: 28px 0 8px;
-}
-
-@media (max-width: 1000px) {
-  .app { grid-template-columns: 190px minmax(0, 1fr); }
-  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 720px) {
-  .app { display: block; }
-  .sidebar { display: none; }
-  main { padding: 22px 14px; }
-  .hero, .chart-grid { grid-template-columns: 1fr; }
-  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .clock { text-align: left; }
-}
-
-@media (max-width: 420px) {
-  .metrics { grid-template-columns: 1fr; }
-}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;line-height:1.5}
+button,select{font:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;flex-shrink:0;background:#0b1220;border-right:1px solid var(--border);padding:24px 16px;position:fixed;inset:0 auto 0 0;overflow-y:auto;z-index:10}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 28px}
+.brand-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#23c8ed,#6579ff);font-size:23px}
+.brand h2{font-size:15px;margin:0;letter-spacing:1.5px}
+.brand small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.nav-label{color:#63738f;font-size:10px;letter-spacing:1.8px;padding:12px}
+.nav{display:grid;gap:6px}
+.nav a{color:var(--muted);text-decoration:none;padding:12px;border-radius:10px;display:flex;align-items:center;gap:11px;font-size:13px}
+.nav a:hover,.nav a.active{background:#16243a;color:var(--cyan)}
+.sidebar-note{margin-top:30px;padding:14px;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:11px}
+.sidebar-note strong{color:var(--green)}
+.main{margin-left:240px;width:calc(100% - 240px);padding:26px 30px 45px;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:26px}
+.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(23px,3vw,32px);margin:5px 0;font-weight:800;letter-spacing:-.8px}
+.subtitle{font-size:12px;color:var(--muted)}
+.top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid var(--border);background:var(--panel);border-radius:30px;font-size:11px;color:var(--muted)}
+.dot{height:7px;width:7px;border-radius:50%;background:var(--green);display:inline-block}
+.dot.off{background:var(--red)}
+.btn{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:9px;padding:9px 13px;font-size:11px}
+.btn:hover{border-color:var(--cyan)}
+section{scroll-margin-top:20px;margin-bottom:32px}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.section-heading h2{font-size:17px;margin:0}
+.section-heading p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.grid{display:grid;gap:15px}
+.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:linear-gradient(145deg,var(--panel),#0d1524);border:1px solid var(--border);border-radius:16px;padding:18px;min-width:0}
+.metric-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.metric-label{font-size:12px;color:var(--muted)}
+.metric-icon{font-size:21px}
+.metric-value{font-size:clamp(27px,3vw,36px);font-weight:800;margin:16px 0 2px;letter-spacing:-1px}
+.metric-unit{font-size:13px;color:var(--muted);font-weight:500}
+.metric-foot{font-size:10px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.meter{height:4px;background:#202c40;border-radius:9px;margin:14px 0 11px;overflow:hidden}
+.meter span{height:100%;display:block;border-radius:9px;transition:width .5s}
+.temp-color{color:var(--orange)}.humidity-color{color:var(--cyan)}.pressure-color{color:var(--purple)}
+.cyan{color:var(--cyan)}.green{color:var(--green)}.orange{color:var(--orange)}
+.muted{color:var(--muted)}
+.two-col{grid-template-columns:repeat(2,minmax(0,1fr))}
+.three-col{grid-template-columns:repeat(3,minmax(0,1fr))}
+.prediction-card{border-top:2px solid var(--cyan)}
+.prediction-card.lstm{border-top-color:var(--purple)}
+.prediction-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.prediction-head h3{font-size:14px;margin:0}
+.tag{font-size:9px;padding:5px 8px;border-radius:20px;background:#173044;color:var(--cyan)}
+.lstm .tag{background:#2b2146;color:var(--purple)}
+.prediction-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.prediction-row:last-of-type{border-bottom:0}
+.prediction-name{font-size:11px;color:var(--muted)}
+.prediction-number{font-size:19px;font-weight:700;text-align:right}
+.prediction-number small{font-size:10px;color:var(--muted);font-weight:500}
+.status-line{font-size:10px;color:var(--muted);margin-top:12px}
+.section-sub-heading{margin:0 0 10px;display:flex;align-items:center}
+.horizon-badge{font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 12px;border-radius:20px}
+.city-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.city-card{padding:15px}
+.city-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.city-name{font-size:13px;font-weight:700}
+.city-region{font-size:10px;color:var(--muted);margin-top:3px}
+.city-weather-icon{font-size:23px}
+.city-temp{font-size:25px;font-weight:800;margin:14px 0 8px}
+.city-details{display:flex;justify-content:space-between;gap:5px;font-size:10px;color:var(--muted)}
+.city-status{font-size:9px;margin-top:12px;color:var(--muted)}
+.weather-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.weather-stat{padding:14px}
+.weather-stat .label{font-size:10px;color:var(--muted)}
+.weather-stat .value{font-size:19px;font-weight:700;margin-top:7px}
+.weather-stat .icon{font-size:18px;margin-bottom:9px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:580px}
+th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;font-size:11px}
+th{color:var(--muted);font-weight:600;background:#101a2b}
+td{color:#d7e1f3}
+tr:last-child td{border-bottom:0}
+.charts-stack{display:flex;flex-direction:column;gap:20px;width:100%}
+.chart-card{width:100%;min-height:300px}
+.chart-container{position:relative;width:100%;height:250px}
+.chart-container canvas{width:100%!important;height:100%!important}
+.history-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px}
+.empty{padding:24px;text-align:center;color:var(--muted);font-size:12px}
+.error{color:var(--red)}
+footer{text-align:center;border-top:1px solid var(--border);padding:20px 0;color:#687892;font-size:10px}
+.mobile-menu{display:none}
+/* Car Speedometer Gauges */
+.speedo-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.speedometer-card{display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:radial-gradient(circle at 50% 20%,#16233a 0%,#0d1524 85%);border:1px solid var(--border);border-radius:18px;padding:16px 14px 14px;position:relative;box-shadow:0 12px 30px -10px rgba(0,0,0,0.6);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.speedometer-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.2);box-shadow:0 16px 36px -8px rgba(0,0,0,0.7)}
+.speedo-top{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.speedometer-wrap{width:100%;max-width:250px;display:flex;justify-content:center;align-items:center;margin:4px 0}
+.speedometer-svg{width:100%;height:auto;overflow:visible;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5))}
+.speedo-needle{transform-box:view-box;transform-origin:110px 105px;transition:transform 0.85s cubic-bezier(0.18,0.89,0.32,1.28)}
+.speedo-card-foot{width:100%;margin-top:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.speedo-status-tag{font-size:9px;font-weight:700;letter-spacing:0.5px;padding:3px 8px;border-radius:12px;background:rgba(255,255,255,0.05)}
+@media(max-width:960px){.speedo-grid{grid-template-columns:1fr;max-width:440px;margin:0 auto}}
+@media(max-width:1200px){.city-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.weather-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){.sidebar{width:205px}.main{margin-left:205px;width:calc(100% - 205px);padding:22px 18px}.metrics{grid-template-columns:1fr}.three-col{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.sidebar{display:none}.main{margin-left:0;width:100%;padding:18px 13px}.topbar{align-items:flex-start}.top-actions{justify-content:flex-end}.two-col,.three-col{grid-template-columns:1fr}.city-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading{align-items:flex-start}.metric-value{font-size:32px}}
 </style>
 </head>
-
 <body>
 <div class="app">
-
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo">G11</div>
-      <div>
-        <h2>Rahul</h2>
-        <small>WEATHER INTELLIGENCE</small>
-      </div>
+      <div class="brand-icon">🌦</div>
+      <div><h2>GROUP 11</h2><small>AI WEATHER INTELLIGENCE</small></div>
     </div>
-
-    <div>
-      <div class="nav-label">DASHBOARD</div>
-      <div class="nav-item active"><span class="nav-icon">⌂</span> Overview</div>
-      <div class="nav-item"><span class="nav-icon">☀</span> Weather Forecast</div>
-      <div class="nav-item"><span class="nav-icon">▥</span> Historical Analytics</div>
-    </div>
-
-    <div class="device">
-      <div class="device-head">
-        <span class="dot" id="sideDot"></span>
-        <span id="deviceStatus">Checking ESP32...</span>
-      </div>
-      <p>Local sensor connection<br>
-      <span id="lastUpdated">Last update: --</span></p>
+    <div class="nav-label">MAIN MENU</div>
+    <nav class="nav">
+      <a href="#overview" class="active">◈ &nbsp; Overview</a>
+      <a href="#predictions">✧ &nbsp; AI Predictions</a>
+      <a href="#kerala">⌖ &nbsp; Kerala Weather</a>
+      <a href="#india">◎ &nbsp; India Weather</a>
+      <a href="#online">☼ &nbsp; Online Weather</a>
+      <a href="#history">▥ &nbsp; Weather History</a>
+    </nav>
+    <div class="sidebar-note">
+      <div>ESP32 SENSOR NETWORK</div>
+      <p><strong id="sideStatus">Checking connection…</strong></p>
+      <div>Temperature · Humidity · Pressure</div>
     </div>
   </aside>
 
-  <main>
-    <div class="topbar">
+  <main class="main">
+    <header class="topbar">
       <div>
-        <div class="eyebrow">IOT • LIVE MONITORING • MACHINE LEARNING</div>
-        <h1>Weather Intelligence Dashboard</h1>
-        <div class="subtitle">ESP32 sensor readings and online weather forecast</div>
+        <div class="eyebrow">ENVIRONMENTAL MONITORING SYSTEM</div>
+        <h1>Weather Intelligence</h1>
+        <div class="subtitle">ESP32 live monitoring · Machine learning predictions · Online weather</div>
       </div>
-
       <div class="top-actions">
-        <div class="clock">
-          <div id="clockDate">--</div>
-          <div id="clockTime">--</div>
+        <div class="pill"><span class="dot off" id="connectionDot"></span><span id="connectionText">Connecting</span></div>
+        <div class="pill" id="lastUpdated">Waiting for data…</div>
+        <button class="btn" id="refreshButton" onclick="refreshAll()">↻ Refresh</button>
+      </div>
+    </header>
+
+    <section id="overview">
+      <div class="section-heading">
+        <div><h2>Live Sensor Readings</h2><p>Measurements received from your ESP32 weather station</p></div>
+        <span class="tag">LIVE DATA</span>
+      </div>
+      <div class="grid metrics speedo-grid">
+        <article class="card speedometer-card">
+          <div class="speedo-top">
+            <span class="metric-label">Temperature</span>
+            <span class="speedo-status-tag" id="tempTag" style="color:var(--orange);border:1px solid rgba(255,159,67,0.3);">DHT11 / BMP180</span>
+          </div>
+          <div class="speedometer-wrap">
+<svg class="speedometer-svg" viewBox="0 0 220 185" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="dialGrad_tempGauge" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#141f33"/>
+      <stop offset="70%" stop-color="#0a1120"/>
+      <stop offset="100%" stop-color="#060a14"/>
+    </radialGradient>
+    <linearGradient id="arcGrad_tempGauge" x1="0%" y1="100%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="#ff9f43"/>
+    </linearGradient>
+    <filter id="glow_tempGauge" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="110" cy="105" r="98" fill="url(#dialGrad_tempGauge)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+  <circle cx="110" cy="105" r="86" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <path d="M 42.45 144.00 A 78 78 0 1 1 177.55 144.00" fill="none" stroke="#162238" stroke-width="8" stroke-linecap="round"/>
+  <path id="tempGaugeArc" d="M 42.45 144.00 A 78 78 0 1 1 177.55 144.00" fill="none" stroke="url(#arcGrad_tempGauge)" stroke-width="8" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 1, 0.5, 1);"/>
+  <line x1="41.06" y1="117.16" x2="37.12" y2="117.85" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="49.38" y1="70.00" x2="45.91" y2="68.00" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="86.06" y1="39.22" x2="84.69" y2="35.46" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="133.94" y1="39.22" x2="135.31" y2="35.46" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="170.62" y1="70.00" x2="174.09" y2="68.00" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="178.94" y1="117.16" x2="182.88" y2="117.85" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="53.71" y1="137.50" x2="45.91" y2="142.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="64.97" y="134.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">-10</text>
+  <line x1="45.99" y1="93.71" x2="37.12" y2="92.15" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="58.79" y="99.17" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">0</text>
+  <line x1="68.22" y1="55.21" x2="62.43" y2="48.31" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="76.58" y="68.37" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">10</text>
+  <line x1="110.00" y1="40.00" x2="110.00" y2="31.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="110.00" y="56.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">20</text>
+  <line x1="151.78" y1="55.21" x2="157.57" y2="48.31" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="143.42" y="68.37" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">30</text>
+  <line x1="174.01" y1="93.71" x2="182.88" y2="92.15" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="161.21" y="99.17" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">40</text>
+  <line x1="166.29" y1="137.50" x2="174.09" y2="142.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="155.03" y="134.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">50</text>
+  <rect x="68" y="128" width="84" height="26" rx="6" fill="#060b14" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text id="tempGaugeDigital" x="110" y="145" fill="#ff9f43" font-size="12.5" font-weight="800" font-family="Inter, monospace" text-anchor="middle">-- <tspan font-size="8.5" fill="#8da2c0">°C</tspan></text>
+  <text x="110" y="169" fill="#5a6d89" font-size="8" font-weight="700" letter-spacing="1.5" font-family="Inter, sans-serif" text-anchor="middle">TEMPERATURE</text>
+  <g id="tempGaugeNeedle" class="speedo-needle" style="transform-origin: 110px 105px; transform: rotate(-120deg);">
+    <path d="M 106.8 105 L 109.2 34 A 1 1 0 0 1 110.8 34 L 113.2 105 L 110 118 Z" fill="#ff9f43" filter="url(#glow_tempGauge)"/>
+    <circle cx="110" cy="105" r="8" fill="#1b283d" stroke="#ff9f43" stroke-width="2"/>
+    <circle cx="110" cy="105" r="3.2" fill="#ffffff"/>
+  </g>
+</svg>
+          </div>
+          <div class="speedo-card-foot">
+            <span>Ambient Level</span>
+            <span id="tempFoot">Waiting for sensor…</span>
+          </div>
+        </article>
+
+        <article class="card speedometer-card">
+          <div class="speedo-top">
+            <span class="metric-label">Relative Humidity</span>
+            <span class="speedo-status-tag" id="humidityTag" style="color:var(--cyan);border:1px solid rgba(0,229,255,0.3);">DHT11 Sensor</span>
+          </div>
+          <div class="speedometer-wrap">
+<svg class="speedometer-svg" viewBox="0 0 220 185" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="dialGrad_humidityGauge" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#141f33"/>
+      <stop offset="70%" stop-color="#0a1120"/>
+      <stop offset="100%" stop-color="#060a14"/>
+    </radialGradient>
+    <linearGradient id="arcGrad_humidityGauge" x1="0%" y1="100%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
+    </linearGradient>
+    <filter id="glow_humidityGauge" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="110" cy="105" r="98" fill="url(#dialGrad_humidityGauge)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+  <circle cx="110" cy="105" r="86" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <path d="M 42.45 144.00 A 78 78 0 1 1 177.55 144.00" fill="none" stroke="#162238" stroke-width="8" stroke-linecap="round"/>
+  <path id="humidityGaugeArc" d="M 42.45 144.00 A 78 78 0 1 1 177.55 144.00" fill="none" stroke="url(#arcGrad_humidityGauge)" stroke-width="8" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 1, 0.5, 1);"/>
+  <line x1="40.38" y1="112.32" x2="36.41" y2="112.74" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="57.98" y1="58.16" x2="55.01" y2="55.48" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="110.00" y1="35.00" x2="110.00" y2="31.00" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="162.02" y1="58.16" x2="164.99" y2="55.48" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="179.62" y1="112.32" x2="183.59" y2="112.74" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="53.71" y1="137.50" x2="45.91" y2="142.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="64.97" y="134.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">0</text>
+  <line x1="48.18" y1="84.91" x2="39.62" y2="82.13" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="60.55" y="92.13" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">20</text>
+  <line x1="83.56" y1="45.62" x2="79.90" y2="37.40" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="88.85" y="60.70" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">40</text>
+  <line x1="136.44" y1="45.62" x2="140.10" y2="37.40" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="131.15" y="60.70" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">60</text>
+  <line x1="171.82" y1="84.91" x2="180.38" y2="82.13" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="159.45" y="92.13" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">80</text>
+  <line x1="166.29" y1="137.50" x2="174.09" y2="142.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="155.03" y="134.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">100</text>
+  <rect x="68" y="128" width="84" height="26" rx="6" fill="#060b14" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text id="humidityGaugeDigital" x="110" y="145" fill="#00e5ff" font-size="12.5" font-weight="800" font-family="Inter, monospace" text-anchor="middle">-- <tspan font-size="8.5" fill="#8da2c0">%</tspan></text>
+  <text x="110" y="169" fill="#5a6d89" font-size="8" font-weight="700" letter-spacing="1.5" font-family="Inter, sans-serif" text-anchor="middle">HUMIDITY</text>
+  <g id="humidityGaugeNeedle" class="speedo-needle" style="transform-origin: 110px 105px; transform: rotate(-120deg);">
+    <path d="M 106.8 105 L 109.2 34 A 1 1 0 0 1 110.8 34 L 113.2 105 L 110 118 Z" fill="#00e5ff" filter="url(#glow_humidityGauge)"/>
+    <circle cx="110" cy="105" r="8" fill="#1b283d" stroke="#00e5ff" stroke-width="2"/>
+    <circle cx="110" cy="105" r="3.2" fill="#ffffff"/>
+  </g>
+</svg>
+          </div>
+          <div class="speedo-card-foot">
+            <span>Air Moisture</span>
+            <span id="humidityFoot">Waiting for sensor…</span>
+          </div>
+        </article>
+
+        <article class="card speedometer-card">
+          <div class="speedo-top">
+            <span class="metric-label">Atmospheric Pressure</span>
+            <span class="speedo-status-tag" id="pressureTag" style="color:var(--purple);border:1px solid rgba(182,154,255,0.3);">BMP180 Sensor</span>
+          </div>
+          <div class="speedometer-wrap">
+<svg class="speedometer-svg" viewBox="0 0 220 185" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="dialGrad_pressureGauge" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#141f33"/>
+      <stop offset="70%" stop-color="#0a1120"/>
+      <stop offset="100%" stop-color="#060a14"/>
+    </radialGradient>
+    <linearGradient id="arcGrad_pressureGauge" x1="0%" y1="100%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="#b69aff"/>
+    </linearGradient>
+    <filter id="glow_pressureGauge" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="110" cy="105" r="98" fill="url(#dialGrad_pressureGauge)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+  <circle cx="110" cy="105" r="86" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <path d="M 42.45 144.00 A 78 78 0 1 1 177.55 144.00" fill="none" stroke="#162238" stroke-width="8" stroke-linecap="round"/>
+  <path id="pressureGaugeArc" d="M 42.45 144.00 A 78 78 0 1 1 177.55 144.00" fill="none" stroke="url(#arcGrad_pressureGauge)" stroke-width="8" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 1, 0.5, 1);"/>
+  <line x1="40.00" y1="105.00" x2="36.00" y2="105.00" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="75.00" y1="44.38" x2="73.00" y2="40.91" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="145.00" y1="44.38" x2="147.00" y2="40.91" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="180.00" y1="105.00" x2="184.00" y2="105.00" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="53.71" y1="137.50" x2="45.91" y2="142.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="64.97" y="134.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">950</text>
+  <line x1="53.71" y1="72.50" x2="45.91" y2="68.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="64.97" y="82.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">975</text>
+  <line x1="110.00" y1="40.00" x2="110.00" y2="31.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="110.00" y="56.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">1000</text>
+  <line x1="166.29" y1="72.50" x2="174.09" y2="68.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="155.03" y="82.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">1025</text>
+  <line x1="166.29" y1="137.50" x2="174.09" y2="142.00" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+  <text x="155.03" y="134.20" fill="#8fa5c5" font-size="8.5" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">1050</text>
+  <rect x="68" y="128" width="84" height="26" rx="6" fill="#060b14" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text id="pressureGaugeDigital" x="110" y="145" fill="#b69aff" font-size="12.5" font-weight="800" font-family="Inter, monospace" text-anchor="middle">-- <tspan font-size="8.5" fill="#8da2c0">hPa</tspan></text>
+  <text x="110" y="169" fill="#5a6d89" font-size="8" font-weight="700" letter-spacing="1.5" font-family="Inter, sans-serif" text-anchor="middle">ATM PRESSURE</text>
+  <g id="pressureGaugeNeedle" class="speedo-needle" style="transform-origin: 110px 105px; transform: rotate(-120deg);">
+    <path d="M 106.8 105 L 109.2 34 A 1 1 0 0 1 110.8 34 L 113.2 105 L 110 118 Z" fill="#b69aff" filter="url(#glow_pressureGauge)"/>
+    <circle cx="110" cy="105" r="8" fill="#1b283d" stroke="#b69aff" stroke-width="2"/>
+    <circle cx="110" cy="105" r="3.2" fill="#ffffff"/>
+  </g>
+</svg>
+          </div>
+          <div class="speedo-card-foot">
+            <span>Sea-Level Barometer</span>
+            <span id="pressureFoot">Waiting for sensor…</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="predictions">
+      <div class="section-heading">
+        <div><h2>AI Weather Predictions</h2><p>XGBoost &amp; LSTM forecasts for 10, 20 and 30 minutes ahead</p></div>
+        <span class="tag">MULTI-HORIZON FORECAST</span>
+      </div>
+
+      <!-- 10-minute horizon -->
+      <div class="section-sub-heading">
+        <span class="horizon-badge" style="background:#1a2d1a;color:#4de0a1;border:1px solid rgba(77,224,161,0.3);">⏱ 10 MIN AHEAD</span>
+      </div>
+      <div class="grid two-col" style="margin-bottom:14px">
+        <article class="card prediction-card">
+          <div class="prediction-head"><h3>&#9889; XGBoost</h3><span class="tag">BOOSTED TREES</span></div>
+          <div class="prediction-row"><span class="prediction-name">Temperature</span><span class="prediction-number" id="xgb10Temp">-- <small>&deg;C</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Humidity</span><span class="prediction-number" id="xgb10Humidity">-- <small>%</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Pressure</span><span class="prediction-number" id="xgb10Pressure">-- <small>hPa</small></span></div>
+          <div class="status-line" id="xgb10Status">Waiting for prediction API&hellip;</div>
+        </article>
+        <article class="card prediction-card lstm">
+          <div class="prediction-head"><h3>&#129504; LSTM</h3><span class="tag">SEQUENCE MODEL</span></div>
+          <div class="prediction-row"><span class="prediction-name">Temperature</span><span class="prediction-number" id="lstm10Temp">-- <small>&deg;C</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Humidity</span><span class="prediction-number" id="lstm10Humidity">-- <small>%</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Pressure</span><span class="prediction-number" id="lstm10Pressure">-- <small>hPa</small></span></div>
+          <div class="status-line" id="lstm10Status">Waiting for prediction API&hellip;</div>
+        </article>
+      </div>
+
+      <!-- 20-minute horizon -->
+      <div class="section-sub-heading">
+        <span class="horizon-badge" style="background:#1a1a2e;color:#7195ff;border:1px solid rgba(113,149,255,0.3);">⏱ 20 MIN AHEAD</span>
+      </div>
+      <div class="grid two-col" style="margin-bottom:14px">
+        <article class="card prediction-card" style="border-top-color:var(--blue)">
+          <div class="prediction-head"><h3>&#9889; XGBoost</h3><span class="tag" style="background:#162040;color:var(--blue)">BOOSTED TREES</span></div>
+          <div class="prediction-row"><span class="prediction-name">Temperature</span><span class="prediction-number" id="xgb20Temp">-- <small>&deg;C</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Humidity</span><span class="prediction-number" id="xgb20Humidity">-- <small>%</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Pressure</span><span class="prediction-number" id="xgb20Pressure">-- <small>hPa</small></span></div>
+          <div class="status-line" id="xgb20Status">Waiting for prediction API&hellip;</div>
+        </article>
+        <article class="card prediction-card" style="border-top-color:var(--green)">
+          <div class="prediction-head"><h3>&#129504; LSTM</h3><span class="tag" style="background:#0e2820;color:var(--green)">SEQUENCE MODEL</span></div>
+          <div class="prediction-row"><span class="prediction-name">Temperature</span><span class="prediction-number" id="lstm20Temp">-- <small>&deg;C</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Humidity</span><span class="prediction-number" id="lstm20Humidity">-- <small>%</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Pressure</span><span class="prediction-number" id="lstm20Pressure">-- <small>hPa</small></span></div>
+          <div class="status-line" id="lstm20Status">Waiting for prediction API&hellip;</div>
+        </article>
+      </div>
+
+      <!-- 30-minute horizon -->
+      <div class="section-sub-heading">
+        <span class="horizon-badge" style="background:#2b1a1a;color:#ff7185;border:1px solid rgba(255,113,133,0.3);">⏱ 30 MIN AHEAD</span>
+      </div>
+      <div class="grid two-col" style="margin-bottom:14px">
+        <article class="card prediction-card" style="border-top-color:var(--orange)">
+          <div class="prediction-head"><h3>&#9889; XGBoost</h3><span class="tag" style="background:#2b1e0e;color:var(--orange)">BOOSTED TREES</span></div>
+          <div class="prediction-row"><span class="prediction-name">Temperature</span><span class="prediction-number" id="xgb30Temp">-- <small>&deg;C</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Humidity</span><span class="prediction-number" id="xgb30Humidity">-- <small>%</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Pressure</span><span class="prediction-number" id="xgb30Pressure">-- <small>hPa</small></span></div>
+          <div class="status-line" id="xgb30Status">Waiting for prediction API&hellip;</div>
+        </article>
+        <article class="card prediction-card" style="border-top-color:var(--red)">
+          <div class="prediction-head"><h3>&#129504; LSTM</h3><span class="tag" style="background:#2b1018;color:var(--red)">SEQUENCE MODEL</span></div>
+          <div class="prediction-row"><span class="prediction-name">Temperature</span><span class="prediction-number" id="lstm30Temp">-- <small>&deg;C</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Humidity</span><span class="prediction-number" id="lstm30Humidity">-- <small>%</small></span></div>
+          <div class="prediction-row"><span class="prediction-name">Pressure</span><span class="prediction-number" id="lstm30Pressure">-- <small>hPa</small></span></div>
+          <div class="status-line" id="lstm30Status">Waiting for prediction API&hellip;</div>
+        </article>
+      </div>
+
+      <div class="subtitle" style="margin-top:10px">Predictions are model estimates. Accuracy decreases with longer horizons.</div>
+    </section>
+
+    <section id="kerala">
+      <div class="section-heading">
+        <div><h2>Kerala Weather</h2><p>Live online conditions for five Kerala locations</p></div>
+        <span class="tag" id="keralaCount">0 CITIES</span>
+      </div>
+      <div class="grid city-grid" id="keralaCities"><div class="card empty">Loading Kerala city weather…</div></div>
+    </section>
+
+    <section id="india">
+      <div class="section-heading">
+        <div><h2>India Weather</h2><p>Conditions across five other Indian cities</p></div>
+        <span class="tag" id="indiaCount">0 CITIES</span>
+      </div>
+      <div class="grid city-grid" id="indiaCities"><div class="card empty">Loading India city weather…</div></div>
+    </section>
+
+    <section id="online">
+      <div class="section-heading">
+        <div><h2>Online Weather Intelligence</h2><p>Open-Meteo weather data for the configured forecast location</p></div>
+        <span class="tag" id="onlineStatus">LOADING</span>
+      </div>
+      <div class="grid weather-grid" id="onlineStats"><div class="card empty">Loading online weather…</div></div>
+      <div class="card" style="margin-top:15px">
+        <div class="section-heading"><div><h2>7-Day Forecast</h2><p>Daily weather forecast from the online weather API</p></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Condition</th><th>Min °C</th><th>Max °C</th><th>Rain %</th><th>UV Index</th></tr></thead>
+            <tbody id="forecastTable"><tr><td colspan="6" class="muted">Waiting for forecast data…</td></tr></tbody>
+          </table>
         </div>
-        <button class="refresh" id="refreshButton">↻ Refresh</button>
-      </div>
-    </div>
-
-    <section class="hero">
-      <div class="hero-main">
-        <div class="hero-label">LOCAL ESP32 TEMPERATURE</div>
-        <div class="hero-temp"><span id="heroTemp">--</span><span> °C</span></div>
-        <div class="hero-foot" id="liveBadge">Waiting for sensor data...</div>
-      </div>
-
-      <div class="hero-side">
-        <div class="big-icon">💧</div>
-        <div class="label">LOCAL HUMIDITY</div>
-        <strong><span id="heroHumidity">--</span>%</strong>
-        <small>Measured by the ESP32-connected humidity sensor</small>
       </div>
     </section>
 
-    <div class="section-title">
-      <div>
-        <h2>Live Sensor Measurements</h2>
-        <p>Measurements reported by your ESP32 device</p>
+    <section id="history">
+      <div class="section-heading">
+        <div><h2>Historical Sensor Data</h2><p>Review readings logged from your ESP32 station</p></div>
+        <div class="history-controls">
+          <select id="historyRange" aria-label="History time range">
+            <option value="1h">Last 1 hour</option>
+            <option value="6h">Last 6 hours</option>
+            <option value="24h" selected>Last 24 hours</option>
+          </select>
+          <button class="btn" onclick="loadHistory()">Load history</button>
+        </div>
       </div>
-      <span class="badge">ESP32 LIVE</span>
-    </div>
-
-    <section class="metrics">
-      <div class="metric">
-        <div class="metric-label">Temperature</div>
-        <div class="metric-value"><span id="temperature">--</span> °C</div>
-        <div class="metric-note">Local sensor reading</div>
+      <div class="charts-stack">
+        <article class="card chart-card">
+          <div class="section-heading">
+            <div><h2>Temperature</h2><p>Historical temperature in °C (Horizontal Time-Series View)</p></div>
+            <span class="tag" style="background:#2b2014;color:var(--orange)">TEMPERATURE (°C)</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="temperatureChart"></canvas>
+          </div>
+        </article>
+        <article class="card chart-card">
+          <div class="section-heading">
+            <div><h2>Humidity</h2><p>Historical relative humidity in % (Horizontal Time-Series View)</p></div>
+            <span class="tag" style="background:#173044;color:var(--cyan)">HUMIDITY (%)</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="humidityChart"></canvas>
+          </div>
+        </article>
+        <article class="card chart-card">
+          <div class="section-heading">
+            <div><h2>Barometric Pressure</h2><p>Historical pressure in hPa (Horizontal Time-Series View)</p></div>
+            <span class="tag" style="background:#2b2146;color:var(--purple)">PRESSURE (hPa)</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="pressureChart"></canvas>
+          </div>
+        </article>
       </div>
-      <div class="metric">
-        <div class="metric-label">Humidity</div>
-        <div class="metric-value"><span id="humidity">--</span> %</div>
-        <div class="metric-note">Local sensor reading</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Atmospheric Pressure</div>
-        <div class="metric-value"><span id="pressure">--</span></div>
-        <div class="metric-note">hPa · Requires working pressure sensor</div>
-      </div>
-    </section>
-
-    <div class="section-title">
-      <div>
-        <h2>Online Weather Overview</h2>
-        <p>Forecast information for the configured location</p>
-      </div>
-      <span class="badge">ONLINE FORECAST</span>
-    </div>
-
-    <section class="weather-grid">
-      <div class="weather-card"><h3>Sunrise</h3><p id="sunrise">--</p></div>
-      <div class="weather-card"><h3>Sunset</h3><p id="sunset">--</p></div>
-      <div class="weather-card"><h3>Daylight Duration</h3><p id="daylight">--</p></div>
-      <div class="weather-card"><h3>Wind Speed</h3><p id="windSpeed">--</p></div>
-      <div class="weather-card"><h3>Wind Direction</h3><p id="windDirection">--</p></div>
-      <div class="weather-card"><h3>Rain Probability</h3><p id="rainChance">--</p></div>
-      <div class="weather-card"><h3>UV Index</h3><p id="uvIndex">--</p></div>
-      <div class="weather-card"><h3>Cloud Cover</h3><p id="cloudCover">--</p></div>
-      <div class="weather-card"><h3>Visibility</h3><p id="visibility">--</p></div>
-      <div class="weather-card"><h3>Today's Rainfall</h3><p id="rainfall">--</p></div>
-    </section>
-
-    <div class="section-title">
-      <div>
-        <h2>7-Day Weather Forecast</h2>
-        <p>Daily forecast values from the online weather service</p>
-      </div>
-    </div>
-
-    <section class="panel">
-      <p id="forecastMessage" class="metric-note">Loading forecast...</p>
-      <div class="forecast-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Min Temperature</th>
-              <th>Max Temperature</th>
-              <th>Rain Probability</th>
-              <th>Rainfall</th>
-            </tr>
-          </thead>
-          <tbody id="forecastRows">
-            <tr><td colspan="5" class="empty">Loading forecast...</td></tr>
-          </tbody>
-        </table>
+      <div class="card" style="margin-top:15px">
+        <div class="section-heading"><div><h2>Recent Readings</h2><p id="historySummary">Historical records from weather_data.csv</p></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Timestamp</th><th>Temperature</th><th>Humidity</th><th>Pressure</th></tr></thead>
+            <tbody id="historyTable"><tr><td colspan="4" class="muted">Loading records…</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <div class="section-title">
-      <div>
-        <h2>Historical Analytics</h2>
-        <p>Readings saved by data_logger.py to weather_data.csv</p>
-      </div>
-      <select id="historyRange" class="refresh">
-        <option value="1h">Last 1 hour</option>
-        <option value="6h">Last 6 hours</option>
-        <option value="24h" selected>Last 24 hours</option>
-        <option value="all">All records</option>
-      </select>
-    </div>
-
-    <section class="chart-grid">
-      <div class="panel">
-        <h3>Temperature History (°C)</h3>
-        <div class="chart-box"><canvas id="temperatureChart"></canvas></div>
-      </div>
-      <div class="panel">
-        <h3>Humidity History (%)</h3>
-        <div class="chart-box"><canvas id="humidityChart"></canvas></div>
-      </div>
-    </section>
-
-    <div class="section-title">
-      <div>
-        <h2>Historical Records</h2>
-        <p>Most recent records from your CSV file</p>
-      </div>
-    </div>
-
-    <section class="panel">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Temperature</th>
-              <th>Humidity</th>
-              <th>Pressure</th>
-            </tr>
-          </thead>
-          <tbody id="historyRows">
-            <tr><td colspan="4" class="empty">Loading history...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <footer>GROUP 11 · ESP32 WEATHER MONITORING AND PREDICTION PROJECT</footer>
+    <footer>GROUP 11 · ESP32 Weather Monitoring & AI Prediction System · Flask Dashboard</footer>
   </main>
 </div>
 
 <script>
 "use strict";
 
-const $ = id => document.getElementById(id);
+const BASE_URL = (window.location.protocol === "http:" || window.location.protocol === "https:") && window.location.port === "5001"
+  ? ""
+  : "http://localhost:5001";
 
-function setText(id, value) {
-  const element = $(id);
-  if (element) element.textContent = value;
+const API = {
+  live: `${BASE_URL}/api/weather`,
+  predictions: `${BASE_URL}/api/predictions`,
+  cities: `${BASE_URL}/api/city-weather`,
+  online: `${BASE_URL}/api/online-weather`,
+  history: `${BASE_URL}/api/history`
+};
+
+let temperatureChart = null;
+let humidityChart = null;
+let pressureChart = null;
+let refreshInProgress = false;
+
+function byId(id) {
+  return document.getElementById(id);
 }
 
-function displayNumber(value, digits = 1) {
-  if (value === null || value === undefined || value === "") return "--";
-  const number = Number(value);
-  return Number.isFinite(number) ? number.toFixed(digits) : "--";
+function isValidNumber(value) {
+  return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
 }
 
-function updateClock() {
-  const now = new Date();
-  setText("clockDate", now.toLocaleDateString("en-IN", {
-    weekday: "short", day: "2-digit", month: "short", year: "numeric"
-  }));
-  setText("clockTime", now.toLocaleTimeString("en-IN"));
+function numberOrNull(value) {
+  return isValidNumber(value) ? Number(value) : null;
 }
 
-async function updateLive() {
+function firstValue(object, keys) {
+  if (!object || typeof object !== "object") return null;
+  for (const key of keys) {
+    if (object[key] !== undefined && object[key] !== null && object[key] !== "") {
+      return object[key];
+    }
+  }
+  return null;
+}
+
+function formatNumber(value, digits = 1) {
+  const number = numberOrNull(value);
+  return number === null ? "--" : number.toFixed(digits);
+}
+
+function formatDate(value) {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString([], {
+    month: "short", day: "2-digit",
+    hour: "2-digit", minute: "2-digit"
+  });
+}
+
+function setText(id, text) {
+  const element = byId(id);
+  if (element) element.textContent = text;
+}
+
+async function fetchJSON(url, timeoutMs = 9000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch("/api/weather", { cache: "no-store" });
-    if (!response.ok) throw new Error("HTTP " + response.status);
-
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
-
-    const temperature = data.temperature;
-    const humidity = data.humidity;
-    const pressure = data.pressure;
-
-    setText("temperature", displayNumber(temperature));
-    setText("heroTemp", displayNumber(temperature));
-    setText("humidity", displayNumber(humidity));
-    setText("heroHumidity", displayNumber(humidity));
-    setText("pressure", pressure == null ? "--" : displayNumber(pressure));
-
-    setText("liveBadge", "● SYSTEM ONLINE");
-    setText("deviceStatus", "ESP32 Connected");
-    setText("lastUpdated", "Last update: " + new Date().toLocaleTimeString("en-IN"));
-
-    $("sideDot")?.classList.add("online");
-  } catch (error) {
-    setText("liveBadge", "ESP32 sensor data unavailable");
-    setText("deviceStatus", "ESP32 Offline");
-    $("sideDot")?.classList.remove("online");
-    console.error("Live sensor error:", error);
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      headers: {"Accept": "application/json"},
+      signal: controller.signal
+    });
+    const raw = await response.text();
+    let data;
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch {
+      throw new Error("The server returned invalid JSON.");
+    }
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+    return data;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
-async function loadOnlineWeather() {
-  const message = $("forecastMessage");
+function updateConnection(online, message) {
+  const dot = byId("connectionDot");
+  if (dot) dot.classList.toggle("off", !online);
+  setText("connectionText", message);
+  setText("sideStatus", online ? "Sensor API reachable" : "Sensor API unavailable");
+}
 
+function setMetric(id, value, unit, digits = 1) {
+  const element = byId(id);
+  if (!element) return;
+  element.innerHTML = `${formatNumber(value, digits)} <span class="metric-unit">${unit}</span>`;
+}
+
+// ---- Speedometer helpers ----
+const SPEEDO_ARC_LEN = 326.73; // circumference of 240° arc, r=78
+
+function updateSpeedometer(gaugeId, value, minVal, maxVal, unit, digits) {
+  const frac = value === null ? 0 : Math.max(0, Math.min(1, (value - minVal) / (maxVal - minVal)));
+  const deg = -120 + frac * 240;
+
+  const needle = byId(gaugeId + "Needle");
+  if (needle) needle.style.transform = `rotate(${deg}deg)`;
+
+  const arc = byId(gaugeId + "Arc");
+  if (arc) arc.style.strokeDashoffset = String(SPEEDO_ARC_LEN * (1 - frac));
+
+  const digital = byId(gaugeId + "Digital");
+  if (digital) {
+    if (value === null) {
+      digital.innerHTML = `-- <tspan font-size="8.5" fill="#8da2c0">${unit}</tspan>`;
+    } else {
+      digital.innerHTML = `${value.toFixed(digits)}<tspan font-size="8.5" fill="#8da2c0"> ${unit}</tspan>`;
+    }
+  }
+}
+
+async function loadLiveWeather() {
   try {
-    const response = await fetch("/api/online-weather", { cache: "no-store" });
-    if (!response.ok) throw new Error("HTTP " + response.status);
+    const responseData = await fetchJSON(API.live, 8000);
+    const data = responseData.readings || responseData.data || responseData.weather || responseData;
 
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
+    const temp = numberOrNull(firstValue(data, ["temperature", "temp", "temperature_c", "temperatureC"]));
+    const hum = numberOrNull(firstValue(data, ["humidity", "relative_humidity", "relativeHumidity"]));
+    const pres = numberOrNull(firstValue(data, ["pressure", "pressure_hpa", "pressure_hPa", "pressureHpa"]));
 
-    const current = data.current || {};
+    // Drive the three speedometer dials
+    updateSpeedometer("tempGauge",     temp, -10, 50,   "°C", 1);
+    updateSpeedometer("humidityGauge", hum,    0, 100,  "%",  1);
+    updateSpeedometer("pressureGauge", pres, 950, 1050, "hPa", 1);
+
+    setText("tempFoot",     temp === null ? "No temperature reading" : `${temp.toFixed(1)} °C received`);
+    setText("humidityFoot", hum  === null ? "No humidity reading"    : `${hum.toFixed(1)}% relative humidity`);
+    setText("pressureFoot", pres === null ? "Pressure unavailable"   : `${pres.toFixed(1)} hPa received`);
+
+    const success = responseData.status !== "error" && (temp !== null || hum !== null || pres !== null);
+    updateConnection(success, success ? "Sensor online" : "No sensor readings");
+    setText("lastUpdated", success ? "Updated " + new Date().toLocaleTimeString() : "No valid sensor readings");
+
+    if (!success) throw new Error("The /api/weather response did not contain numeric sensor readings.");
+  } catch (error) {
+    updateConnection(false, "Sensor offline");
+    // Reset needles to zero on error
+    updateSpeedometer("tempGauge",     null, -10, 50,   "°C", 1);
+    updateSpeedometer("humidityGauge", null,   0, 100,  "%",  1);
+    updateSpeedometer("pressureGauge", null, 950, 1050, "hPa", 1);
+    setText("tempFoot",     "Could not read ESP32 data");
+    setText("humidityFoot", "Could not read ESP32 data");
+    setText("pressureFoot", "Could not read ESP32 data");
+    setText("lastUpdated", "Live sensor unavailable");
+    console.error("Live weather error:", error);
+  }
+}
+
+function predictionObject(data, modelName) {
+  const model = data && data[modelName];
+  return model && typeof model === "object" ? model : null;
+}
+
+function predictionValue(model, keys) {
+  return firstValue(model, keys);
+}
+
+function setPrediction(id, value, unit) {
+  const element = byId(id);
+  if (element) element.innerHTML = `${formatNumber(value)} <small>${unit}</small>`;
+}
+
+async function loadPredictions() {
+  try {
+    const data = await fetchJSON(API.predictions);
+    if (data.status === "error") throw new Error(data.error || "Prediction service returned an error.");
+
+    const horizons = data.horizons || {};
+    const HLIST = [10, 20, 30];
+
+    for (const h of HLIST) {
+      const hData = horizons[String(h)] || {};
+      const xgb  = hData.xgboost && !hData.xgboost.error ? hData.xgboost : null;
+      const lstm  = hData.lstm    && !hData.lstm.error    ? hData.lstm    : null;
+
+      if (xgb) {
+        setPrediction(`xgb${h}Temp`,     xgb.temperature, "°C");
+        setPrediction(`xgb${h}Humidity`, xgb.humidity,    "%");
+        setPrediction(`xgb${h}Pressure`, xgb.pressure,    "hPa");
+        setText(`xgb${h}Status`, `XGBoost ${h}-min prediction received.`);
+      } else {
+        [`xgb${h}Temp`, `xgb${h}Humidity`, `xgb${h}Pressure`].forEach(id => setPrediction(id, null, ""));
+        const errMsg = hData.xgboost && hData.xgboost.error ? hData.xgboost.error : "Model not loaded. Run train_xgboost.py.";
+        setText(`xgb${h}Status`, errMsg);
+      }
+
+      if (lstm) {
+        setPrediction(`lstm${h}Temp`,     lstm.temperature, "°C");
+        setPrediction(`lstm${h}Humidity`, lstm.humidity,    "%");
+        setPrediction(`lstm${h}Pressure`, lstm.pressure,    "hPa");
+        setText(`lstm${h}Status`, `LSTM ${h}-min prediction received.`);
+      } else {
+        [`lstm${h}Temp`, `lstm${h}Humidity`, `lstm${h}Pressure`].forEach(id => setPrediction(id, null, ""));
+        const errMsg = hData.lstm && hData.lstm.error ? hData.lstm.error : "Model not loaded. Run train_lstm.py.";
+        setText(`lstm${h}Status`, errMsg);
+      }
+    }
+  } catch (error) {
+    [10, 20, 30].forEach(h => {
+      setText(`xgb${h}Status`,  "Prediction unavailable: " + error.message);
+      setText(`lstm${h}Status`, "Prediction unavailable: " + error.message);
+    });
+    console.error("Prediction API error:", error);
+  }
+}
+
+function weatherIcon(value) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("thunder")) return "⛈️";
+  if (text.includes("rain") || text.includes("drizzle") || text.includes("shower")) return "🌧️";
+  if (text.includes("cloud") || text.includes("overcast")) return "☁️";
+  if (text.includes("fog") || text.includes("mist")) return "🌫️";
+  if (text.includes("clear") || text.includes("sun")) return "☀️";
+  return "🌤️";
+}
+
+function cityWeatherDescription(city) {
+  return firstValue(city, ["condition", "description", "weather", "weather_description", "summary"]) || "Current conditions";
+}
+
+function normalizeCityName(city) {
+  return firstValue(city, ["city", "name", "location"]) || "Unknown city";
+}
+
+function cityGroup(city) {
+  const explicit = String(firstValue(city, ["group", "region", "state"]) || "").toLowerCase();
+  const name = normalizeCityName(city).toLowerCase();
+  const keralaNames = ["thrissur", "kochi", "ernakulam", "kozhikode", "calicut", "thiruvananthapuram", "trivandrum", "palakkad", "kollam", "kannur", "wayanad", "kottayam", "alappuzha", "malappuram", "kasaragod", "pathanamthitta", "idukki"];
+  if (explicit.includes("kerala") || keralaNames.some(n => name.includes(n))) return "Kerala";
+  return "India";
+}
+
+function renderCityCard(city) {
+  const name = normalizeCityName(city);
+  const temperature = firstValue(city, ["temperature", "temp", "temperature_2m", "current_temperature"]);
+  const humidity = firstValue(city, ["humidity", "relative_humidity", "relative_humidity_2m"]);
+  const condition = cityWeatherDescription(city);
+  const time = firstValue(city, ["time", "updated", "timestamp", "last_updated"]);
+  const pressure = firstValue(city, ["pressure", "pressure_msl", "pressure_hpa"]);
+
+  const card = document.createElement("article");
+  card.className = "card city-card";
+  const top = document.createElement("div");
+  top.className = "city-top";
+  const titleWrap = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "city-name";
+  title.textContent = name;
+  const region = document.createElement("div");
+  region.className = "city-region";
+  region.textContent = firstValue(city, ["state", "region", "group"]) || "India";
+  titleWrap.append(title, region);
+
+  const icon = document.createElement("div");
+  icon.className = "city-weather-icon";
+  icon.textContent = weatherIcon(condition);
+  top.append(titleWrap, icon);
+
+  const temp = document.createElement("div");
+  temp.className = "city-temp";
+  temp.textContent = `${formatNumber(temperature)}°C`;
+
+  const details = document.createElement("div");
+  details.className = "city-details";
+  const hum = document.createElement("span");
+  hum.textContent = `💧 ${formatNumber(humidity, 0)}%`;
+  const pres = document.createElement("span");
+  pres.textContent = pressure === null ? "" : `${formatNumber(pressure, 0)} hPa`;
+  details.append(hum, pres);
+
+  const status = document.createElement("div");
+  status.className = "city-status";
+  status.textContent = `${condition}${time ? " · " + formatDate(time) : ""}`;
+  card.append(top, temp, details, status);
+  return card;
+}
+
+function renderCityError(containerId, message) {
+  const container = byId(containerId);
+  container.replaceChildren();
+  const card = document.createElement("div");
+  card.className = "card empty error";
+  card.textContent = message;
+  container.appendChild(card);
+}
+
+async function loadCities() {
+  try {
+    const data = await fetchJSON(API.cities);
+    const cities = Array.isArray(data) ? data : (Array.isArray(data.cities) ? data.cities : (Array.isArray(data.data) ? data.data : []));
+    if (data.status === "error") throw new Error(data.error || "City weather API error.");
+    if (!cities.length) throw new Error("No cities were returned by /api/city-weather.");
+
+    const kerala = cities.filter(city => cityGroup(city) === "Kerala");
+    const india = cities.filter(city => cityGroup(city) !== "Kerala");
+
+    byId("keralaCities").replaceChildren();
+    byId("indiaCities").replaceChildren();
+
+    if (!kerala.length) renderCityError("keralaCities", "No Kerala cities identified. Ensure the API marks Kerala entries with group: 'Kerala'.");
+    else kerala.forEach(city => byId("keralaCities").appendChild(renderCityCard(city)));
+
+    if (!india.length) renderCityError("indiaCities", "No other Indian cities returned by the city weather API.");
+    else india.forEach(city => byId("indiaCities").appendChild(renderCityCard(city)));
+
+    setText("keralaCount", `${kerala.length} CITIES`);
+    setText("indiaCount", `${india.length} CITIES`);
+  } catch (error) {
+    renderCityError("keralaCities", "Kerala weather unavailable: " + error.message);
+    renderCityError("indiaCities", "India weather unavailable: " + error.message);
+    setText("keralaCount", "UNAVAILABLE");
+    setText("indiaCount", "UNAVAILABLE");
+    console.error("City weather error:", error);
+  }
+}
+
+function weatherCodeText(code) {
+  const map = {
+    0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",
+    45:"Fog",48:"Depositing rime fog",51:"Light drizzle",53:"Drizzle",
+    55:"Dense drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",
+    71:"Light snow",73:"Snow",75:"Heavy snow",80:"Rain showers",
+    81:"Rain showers",82:"Heavy rain showers",95:"Thunderstorm",
+    96:"Thunderstorm with hail",99:"Thunderstorm with hail"
+  };
+  return map[Number(code)] || "Weather conditions";
+}
+
+function addWeatherStat(container, icon, label, value) {
+  const card = document.createElement("article");
+  card.className = "card weather-stat";
+  const iconEl = document.createElement("div");
+  iconEl.className = "icon";
+  iconEl.textContent = icon;
+  const labelEl = document.createElement("div");
+  labelEl.className = "label";
+  labelEl.textContent = label;
+  const valueEl = document.createElement("div");
+  valueEl.className = "value";
+  valueEl.textContent = value;
+  card.append(iconEl, labelEl, valueEl);
+  container.appendChild(card);
+}
+
+function formatDuration(seconds) {
+  const n = numberOrNull(seconds);
+  if (n === null) return "--";
+  const hours = Math.floor(n / 3600);
+  const minutes = Math.round((n % 3600) / 60);
+  return `${hours}h ${minutes}m`;
+}
+
+async function loadOnlineWeather() {
+  try {
+    const data = await fetchJSON(API.online);
+    if (data.status === "error") throw new Error(data.error || "Online weather API error.");
+
+    const current = data.current || data.current_weather || {};
     const hourly = data.hourly || {};
     const daily = data.daily || {};
+    const container = byId("onlineStats");
+    container.replaceChildren();
 
-    function fmt(value, unit = "") {
-      if (value === null || value === undefined || value === "") return "--";
-      const number = Number(value);
-      return Number.isFinite(number) ? number + unit : "--";
+    const temp = firstValue(current, ["temperature_2m", "temperature", "temp"]);
+    const humidity = firstValue(current, ["relative_humidity_2m", "relative_humidity", "humidity"]);
+    const apparent = firstValue(current, ["apparent_temperature", "feels_like"]);
+    const wind = firstValue(current, ["wind_speed_10m", "windspeed", "wind_speed"]);
+    const windDirection = firstValue(current, ["wind_direction_10m", "winddirection", "wind_direction"]);
+    const code = firstValue(current, ["weather_code", "weathercode", "code"]);
+    const cloud = firstValue(current, ["cloud_cover", "cloudcover"]);
+    const pressure = firstValue(current, ["surface_pressure", "pressure_msl", "pressure"]);
+    const uv = Array.isArray(daily.uv_index_max) ? daily.uv_index_max[0] : firstValue(current, ["uv_index"]);
+    const rainProb = Array.isArray(hourly.precipitation_probability) ? hourly.precipitation_probability[0] : firstValue(current, ["precipitation_probability", "rain_probability"]);
+    const precipitation = Array.isArray(hourly.precipitation) ? hourly.precipitation[0] : firstValue(current, ["precipitation", "rain"]);
+    const visibility = Array.isArray(hourly.visibility) ? hourly.visibility[0] : firstValue(current, ["visibility"]);
+    const sunrise = Array.isArray(daily.sunrise) ? daily.sunrise[0] : daily.sunrise;
+    const sunset = Array.isArray(daily.sunset) ? daily.sunset[0] : daily.sunset;
+    const daylight = Array.isArray(daily.daylight_duration) ? daily.daylight_duration[0] : daily.daylight_duration;
+
+    addWeatherStat(container, weatherIcon(weatherCodeText(code)), "CONDITION", weatherCodeText(code));
+    addWeatherStat(container, "🌡️", "FEELS LIKE", `${formatNumber(apparent ?? temp)} °C`);
+    addWeatherStat(container, "💨", "WIND SPEED", wind === null ? "--" : `${formatNumber(wind)} km/h`);
+    addWeatherStat(container, "🧭", "WIND DIRECTION", windDirection === null ? "--" : `${formatNumber(windDirection, 0)}°`);
+    addWeatherStat(container, "🌧️", "RAIN PROBABILITY", rainProb === null ? "--" : `${formatNumber(rainProb, 0)}%`);
+    addWeatherStat(container, "☀️", "UV INDEX", uv === null ? "--" : formatNumber(uv, 1));
+    addWeatherStat(container, "☁️", "CLOUD COVER", cloud === null ? "--" : `${formatNumber(cloud, 0)}%`);
+    addWeatherStat(container, "🌊", "ONLINE PRESSURE", pressure === null ? "--" : `${formatNumber(pressure)} hPa`);
+    addWeatherStat(container, "🌅", "SUNRISE", sunrise ? formatClock(sunrise) : "--");
+    addWeatherStat(container, "🌇", "SUNSET", sunset ? formatClock(sunset) : "--");
+    addWeatherStat(container, "🌞", "DAYLIGHT", formatDuration(daylight));
+    addWeatherStat(container, "🌦️", "PRECIPITATION", precipitation === null ? "--" : `${formatNumber(precipitation)} mm`);
+
+    if (visibility !== null) {
+      const visibilityKm = Number(visibility) > 100 ? Number(visibility) / 1000 : Number(visibility);
+      addWeatherStat(container, "👁️", "VISIBILITY", `${formatNumber(visibilityKm)} km`);
     }
 
-    function timeOnly(value) {
-      if (!value) return "--";
-      return value.slice(11, 16);
+    setText("onlineStatus", "ONLINE DATA");
+    renderForecast(daily);
+  } catch (error) {
+    byId("onlineStats").innerHTML = "";
+    const card = document.createElement("div");
+    card.className = "card empty error";
+    card.textContent = "Online weather unavailable: " + error.message;
+    byId("onlineStats").appendChild(card);
+    setText("onlineStatus", "UNAVAILABLE");
+    byId("forecastTable").innerHTML = '<tr><td colspan="6" class="error">Forecast unavailable. Check /api/online-weather.</td></tr>';
+    console.error("Online weather error:", error);
+  }
+}
+
+function formatClock(value) {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+}
+
+function renderForecast(daily) {
+  const dates = daily.time || [];
+  const minTemps = daily.temperature_2m_min || [];
+  const maxTemps = daily.temperature_2m_max || [];
+  const rain = daily.precipitation_probability_max || [];
+  const uv = daily.uv_index_max || [];
+  const codes = daily.weather_code || daily.weathercode || [];
+  const body = byId("forecastTable");
+  body.replaceChildren();
+
+  if (!dates.length) {
+    body.innerHTML = '<tr><td colspan="6" class="muted">No daily forecast fields returned by the API.</td></tr>';
+    return;
+  }
+
+  dates.forEach((date, i) => {
+    const tr = document.createElement("tr");
+    const values = [
+      formatDate(date),
+      `${weatherIcon(weatherCodeText(codes[i]))} ${weatherCodeText(codes[i])}`,
+      formatNumber(minTemps[i]),
+      formatNumber(maxTemps[i]),
+      rain[i] === undefined ? "--" : `${formatNumber(rain[i], 0)}%`,
+      formatNumber(uv[i])
+    ];
+    values.forEach(value => {
+      const td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function chartOptions(yLabel) {
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    interaction:{mode:"index",intersect:false},
+    plugins:{
+      legend:{labels:{color:"#b8c7df",boxWidth:10,font:{size:10}}},
+      tooltip:{enabled:true}
+    },
+    scales:{
+      x:{ticks:{color:"#91a0b9",maxTicksLimit:14,font:{size:9}},grid:{color:"rgba(145,160,185,.10)"}},
+      y:{title:{display:true,text:yLabel,color:"#91a0b9"},ticks:{color:"#91a0b9",font:{size:9}},grid:{color:"rgba(145,160,185,.10)"}}
     }
+  };
+}
 
-    setText("sunrise", timeOnly(daily.sunrise?.[0]));
-    setText("sunset", timeOnly(daily.sunset?.[0]));
+function createOrUpdateChart(existing, canvasId, label, values, labels, yLabel, color = "#46d9f5", fillColor = "rgba(70,217,245,0.06)") {
+  if (typeof Chart === "undefined") return existing;
+  const canvas = byId(canvasId);
+  if (!canvas) return existing;
+  if (existing) {
+    existing.data.labels = labels;
+    existing.data.datasets[0].data = values;
+    existing.data.datasets[0].borderColor = color;
+    existing.data.datasets[0].backgroundColor = fillColor;
+    existing.update();
+    return existing;
+  }
+  return new Chart(canvas, {
+    type:"line",
+    data:{
+      labels,
+      datasets:[{
+        label,
+        data:values,
+        borderColor:color,
+        backgroundColor:fillColor,
+        borderWidth:2,
+        pointRadius:2,
+        pointHoverRadius:5,
+        tension:.3,
+        spanGaps:true,
+        fill:true
+      }]
+    },
+    options:chartOptions(yLabel)
+  });
+}
 
-    const seconds = daily.daylight_duration?.[0];
-    setText("daylight", seconds == null ? "--" :
-      Math.floor(seconds / 3600) + "h " +
-      Math.floor((seconds % 3600) / 60) + "m");
+async function loadHistory() {
+  const range = byId("historyRange").value || "24h";
+  try {
+    const data = await fetchJSON(`${API.history}?range=${encodeURIComponent(range)}`);
+    if (data.status === "error") throw new Error(data.error || "History API error.");
 
-    setText("windSpeed", fmt(current.wind_speed_10m, " km/h"));
-    setText("windDirection", fmt(current.wind_direction_10m, "°"));
-    setText("cloudCover", fmt(current.cloud_cover, "%"));
-    setText("rainfall", fmt(daily.precipitation_sum?.[0], " mm"));
+    let records = Array.isArray(data) ? data : (Array.isArray(data.records) ? data.records : (Array.isArray(data.history) ? data.history : []));
+    records = records.map(record => ({
+      timestamp: firstValue(record, ["timestamp", "time", "datetime", "date"]),
+      temperature: numberOrNull(firstValue(record, ["temperature", "temp"])),
+      humidity: numberOrNull(firstValue(record, ["humidity", "relative_humidity"])),
+      pressure: numberOrNull(firstValue(record, ["pressure", "pressure_hpa"]))
+    })).filter(record => record.timestamp);
 
-    // Use the current hour in India to find the corresponding hourly forecast.
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      hourCycle: "h23"
-    }).formatToParts(new Date());
+    records.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const labels = records.map(record => {
+      const date = new Date(record.timestamp);
+      return Number.isNaN(date.getTime()) ? String(record.timestamp) : date.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+    });
 
-    const part = Object.fromEntries(parts.map(item => [item.type, item.value]));
-    const currentHour = `${part.year}-${part.month}-${part.day}T${part.hour}`;
+    temperatureChart = createOrUpdateChart(temperatureChart, "temperatureChart", "Temperature (°C)", records.map(record => record.temperature), labels, "°C", "#ffbd69", "rgba(255,189,105,0.07)");
+    humidityChart = createOrUpdateChart(humidityChart, "humidityChart", "Humidity (%)", records.map(record => record.humidity), labels, "%", "#46d9f5", "rgba(70,217,245,0.07)");
+    pressureChart = createOrUpdateChart(pressureChart, "pressureChart", "Pressure (hPa)", records.map(record => record.pressure), labels, "hPa", "#b69aff", "rgba(182,154,255,0.07)");
 
-    let index = Array.isArray(hourly.time)
-      ? hourly.time.findIndex(time => time.startsWith(currentHour))
-      : -1;
+    const body = byId("historyTable");
+    body.replaceChildren();
+    const recent = records.slice(-20).reverse();
 
-    if (index < 0) index = 0;
-
-    setText("rainChance", fmt(hourly.precipitation_probability?.[index], "%"));
-    setText("uvIndex", fmt(hourly.uv_index?.[index]));
-
-    const visibility = hourly.visibility?.[index];
-    setText("visibility", visibility == null
-      ? "--" : (Number(visibility) / 1000).toFixed(1) + " km");
-
-    const rows = $("forecastRows");
-    rows.replaceChildren();
-
-    if (Array.isArray(daily.time)) {
-      daily.time.forEach((date, i) => {
-        const values = [
-          date,
-          fmt(daily.temperature_2m_min?.[i], " °C"),
-          fmt(daily.temperature_2m_max?.[i], " °C"),
-          fmt(daily.precipitation_probability_max?.[i], "%"),
-          fmt(daily.precipitation_sum?.[i], " mm")
-        ];
-
+    if (!recent.length) {
+      body.innerHTML = '<tr><td colspan="4" class="muted">No history records found for this time range.</td></tr>';
+    } else {
+      recent.forEach(record => {
         const tr = document.createElement("tr");
-
-        values.forEach(value => {
+        [
+          formatDate(record.timestamp),
+          record.temperature === null ? "--" : `${record.temperature.toFixed(1)} °C`,
+          record.humidity === null ? "--" : `${record.humidity.toFixed(1)} %`,
+          record.pressure === null ? "--" : `${record.pressure.toFixed(1)} hPa`
+        ].forEach(value => {
           const td = document.createElement("td");
           td.textContent = value;
           tr.appendChild(td);
         });
-
-        rows.appendChild(tr);
+        body.appendChild(tr);
       });
     }
-
-    message.textContent = "Online forecast updated successfully.";
+    setText("historySummary", `${records.length} records loaded · ${range} · newest first in table`);
   } catch (error) {
-    console.error("Online weather error:", error);
-    message.textContent =
-      "Could not load online weather. Check your internet connection and Flask.";
+    setText("historySummary", "History unavailable: " + error.message);
+    byId("historyTable").innerHTML = '<tr><td colspan="4" class="error">Could not load history. Check /api/history.</td></tr>';
+    console.error("History API error:", error);
   }
 }
 
-let temperatureChart;
-let humidityChart;
-
-function createChart(canvasId, label, color) {
-  const canvas = $(canvasId);
-  return new Chart(canvas, {
-    type: "line",
-    data: {
-      labels: [],
-      datasets: [{
-        label,
-        data: [],
-        borderColor: color,
-        backgroundColor: color + "22",
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-        pointRadius: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { intersect: false, mode: "index" },
-      plugins: { legend: { labels: { color: "#aab8cf" } } },
-      scales: {
-        x: {
-          ticks: { color: "#8998b2", maxTicksLimit: 7 },
-          grid: { color: "#243047" }
-        },
-        y: {
-          ticks: { color: "#8998b2" },
-          grid: { color: "#243047" }
-        }
-      }
-    }
-  });
-}
-
-async function updateHistory() {
-  const range = $("historyRange").value;
-
+async function refreshAll() {
+  if (refreshInProgress) return;
+  refreshInProgress = true;
+  const button = byId("refreshButton");
+  button.disabled = true;
+  button.textContent = "Refreshing…";
   try {
-    const response = await fetch(
-      "/api/history?range=" + encodeURIComponent(range),
-      { cache: "no-store" }
-    );
-
-    if (!response.ok) throw new Error("HTTP " + response.status);
-
-    const data = await response.json();
-    const records = Array.isArray(data.records) ? data.records : [];
-
-    const validTemperature = records.filter(
-      row => row.temperature !== null && row.temperature !== undefined
-    );
-
-    const validHumidity = records.filter(
-      row => row.humidity !== null && row.humidity !== undefined
-    );
-
-    const labels = records.map(row => {
-      const date = new Date(row.timestamp);
-      return Number.isNaN(date.getTime())
-        ? row.timestamp
-        : date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-    });
-
-    const temperatureLookup = new Map(
-      validTemperature.map(row => [row.timestamp, Number(row.temperature)])
-    );
-
-    const humidityLookup = new Map(
-      validHumidity.map(row => [row.timestamp, Number(row.humidity)])
-    );
-
-    temperatureChart.data.labels = labels;
-    temperatureChart.data.datasets[0].data = records.map(
-      row => temperatureLookup.has(row.timestamp)
-        ? temperatureLookup.get(row.timestamp) : null
-    );
-    temperatureChart.update();
-
-    humidityChart.data.labels = labels;
-    humidityChart.data.datasets[0].data = records.map(
-      row => humidityLookup.has(row.timestamp)
-        ? humidityLookup.get(row.timestamp) : null
-    );
-    humidityChart.update();
-
-    const tbody = $("historyRows");
-    tbody.replaceChildren();
-
-    const recent = records.slice(-30).reverse();
-
-    if (recent.length === 0) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = 4;
-      td.className = "empty";
-      td.textContent = "No historical records found for this period.";
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-      return;
-    }
-
-    recent.forEach(row => {
-      const tr = document.createElement("tr");
-
-      const values = [
-        row.timestamp || "--",
-        row.temperature == null ? "--" : displayNumber(row.temperature) + " °C",
-        row.humidity == null ? "--" : displayNumber(row.humidity) + " %",
-        row.pressure == null ? "--" : displayNumber(row.pressure) + " hPa"
-      ];
-
-      values.forEach(value => {
-        const td = document.createElement("td");
-        td.textContent = value;
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-  } catch (error) {
-    console.error("History error:", error);
-    const tbody = $("historyRows");
-    tbody.innerHTML =
-      '<tr><td colspan="4" class="empty">Could not load historical data.</td></tr>';
+    await Promise.allSettled([loadLiveWeather(),loadPredictions(),loadCities(),loadOnlineWeather(),loadHistory()]);
+  } finally {
+    refreshInProgress = false;
+    button.disabled = false;
+    button.textContent = "↻ Refresh";
   }
 }
 
-function refreshAll() {
-  updateLive();
-  loadOnlineWeather();
-  updateHistory();
-}
+document.querySelectorAll(".nav a").forEach(link => {
+  link.addEventListener("click", () => {
+    document.querySelectorAll(".nav a").forEach(item => item.classList.remove("active"));
+    link.classList.add("active");
+  });
+});
 
-temperatureChart = createChart("temperatureChart", "Temperature °C", "#48e0e8");
-humidityChart = createChart("humidityChart", "Humidity %", "#ff7eab");
-
-$("refreshButton").addEventListener("click", refreshAll);
-$("historyRange").addEventListener("change", updateHistory);
-
-updateClock();
 refreshAll();
 
-setInterval(updateClock, 1000);
-setInterval(updateLive, 10000);
-setInterval(loadOnlineWeather, 10 * 60 * 1000);
-setInterval(updateHistory, 30000);
+setInterval(() => {
+  loadLiveWeather();
+  loadPredictions();
+  loadHistory();
+}, 30000);
+
+setInterval(() => {
+  loadCities();
+  loadOnlineWeather();
+}, 300000);
 </script>
 </body>
 </html>

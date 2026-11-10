@@ -5,14 +5,15 @@ import os
 import time
 from datetime import datetime
 
-# Your ESP32 weather station
-ESP32_URL = "http://10.163.181.58/api/data"
+# Current ESP32 weather station IP
+ESP32_URL = "http://10.55.192.58/api/data"
 
-# CSV file created in your project folder
+# CSV file in your project folder
 CSV_FILE = "weather_data.csv"
 
 print("ESP32 Weather Data Logger Started!")
-print("Collecting temperature and humidity...")
+print("Collecting temperature, humidity, and pressure...")
+print("Logging interval: 30 seconds")
 print("Press Ctrl+C to stop.\n")
 
 try:
@@ -23,29 +24,31 @@ try:
             response.raise_for_status()
             data = response.json()
 
-            # Read sensor values
             temperature = data.get("temperature")
             humidity = data.get("humidity")
             pressure = data.get("pressure")
 
-            # Temperature and humidity are required.
-            # Pressure is optional.
+            # Temperature and humidity are required
             if temperature is None or humidity is None:
                 print("Temperature or humidity unavailable:", data)
 
             else:
-                # Leave pressure blank if it is unavailable
+                # Keep missing pressure blank, not zero
                 if pressure is None:
                     pressure = ""
 
-                # Add a header only if the file is new or empty
+                # Add header only if file is new or empty
                 file_exists = (
                     os.path.exists(CSV_FILE)
                     and os.path.getsize(CSV_FILE) > 0
                 )
 
-                with open(CSV_FILE, "a", newline="",
-                          encoding="utf-8") as file:
+                with open(
+                    CSV_FILE,
+                    "a",
+                    newline="",
+                    encoding="utf-8"
+                ) as file:
                     writer = csv.writer(file)
 
                     if not file_exists:
@@ -63,10 +66,16 @@ try:
                         pressure
                     ])
 
+                pressure_display = (
+                    f"{pressure} hPa"
+                    if pressure != ""
+                    else "Unavailable"
+                )
+
                 print(
                     f"Saved | Temperature: {temperature} °C | "
                     f"Humidity: {humidity}% | "
-                    f"Pressure: {pressure if pressure != '' else 'Unavailable'}"
+                    f"Pressure: {pressure_display}"
                 )
 
         except requests.exceptions.RequestException as error:
